@@ -1,41 +1,36 @@
-문자 작성, 저장 사이트
+DocuTag문서 작성 및 관리 시스템 - AI 기반 문서 정리 및 포매팅 기능 제공📋 프로젝트 개요DocuTag는 사용자가 문서를 작성하고 태그로 분류하여 효율적으로 관리할 수 있는 웹 기반 문서 관리 시스템입니다. AI(Gemini)를 활용하여 문서 내용을 자동으로 정리하고 포매팅할 수 있습니다.✨ 주요 기능📝 문서 작성제목 및 내용 작성태그 설정 (다중 태그 지원)AI 기반 내용 정리 및 포매팅다양한 글 형식 선택 (보고서, 요약, 리스트 등)AI에게 추가 요청 가능✏️ 문서 수정제목 및 내용 수정태그 추가/삭제AI를 활용한 내용 재정리🗑️ 문서 삭제소프트 삭제 방식 (복구 가능)🔍 문서 조회등록순 조회 (기본)무한 스크롤 페이징태그 기반 검색기간 검색정렬 (오름차순/내림차순)👤 회원 기능카카오 OAuth 로그인회원별 문서 관리🛠️ 기술 스택FrontendReactCSS3AxiosBackendJavaSpring BootMyBatisDatabaseMySQLAIGoogle Gemini APIAuthenticationKakao OAuth 2.0📊 데이터베이스 설계 (ERD) Code         users (1) ──────< (N) documents                       │                       └──< (N) document_tags >──(N) tags
+      테이블 구조users (회원) Code         CREATE TABLE users (    user_id BIGINT PRIMARY KEY AUTO_INCREMENT,    oauth_provider VARCHAR(20) NOT NULL,    oauth_id VARCHAR(100) NOT NULL,    email VARCHAR(100),    nickname VARCHAR(50) NOT NULL,    profile_image VARCHAR(255),    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,    last_login_at TIMESTAMP,    is_active BOOLEAN DEFAULT TRUE,    UNIQUE KEY unique_oauth (oauth_provider, oauth_id));
+      코드 접기 13줄documents (문서) Code         CREATE TABLE documents (    document_id BIGINT PRIMARY KEY AUTO_INCREMENT,    user_id BIGINT NOT NULL,    title VARCHAR(200) NOT NULL,    content TEXT,    is_public BOOLEAN DEFAULT FALSE,    view_count INT DEFAULT 0,    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,    deleted_at TIMESTAMP NULL,    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE);
+      코드 접기 12줄tags (태그) Code         CREATE TABLE tags (    tag_id BIGINT PRIMARY KEY AUTO_INCREMENT,    tag_name VARCHAR(50) NOT NULL UNIQUE,    usage_count INT DEFAULT 0,    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+      document_tags (문서-태그 연결) Code         CREATE TABLE document_tags (    document_tag_id BIGINT PRIMARY KEY AUTO_INCREMENT,    document_id BIGINT NOT NULL,    tag_id BIGINT NOT NULL,    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    FOREIGN KEY (document_id) REFERENCES documents(document_id) ON DELETE CASCADE,    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE,    UNIQUE KEY unique_document_tag (document_id, tag_id));
+      코드 접기 9줄📡 API 명세문서 관련 API1. 문서 저장 Code         /** * 문서 저장 * @param document 문서 객체 (title, content, tags 포함) * @return 저장된 문서 ID */POST /api/documentsDocuSave(Document document)
+      코드 접기 7줄Request Body Code         {  "title": "문서 제목",  "content": "문서 내용",  "tags": ["JavaScript", "React", "프론트엔드"],  "isPublic": false}
+      Response Code         {  "success": true,  "documentId": 1,  "message": "문서가 저장되었습니다."}
+      2. AI 호출 (내용 정리/포매팅) Code         /** * Gemini AI를 이용한 문서 정리 및 포매팅 * @param request AI 요청 객체 (content, format, additionalRequest) * @return AI가 정리한 내용 */POST /api/ai/geminigemiCall(AiRequest request)
+      코드 접기 7줄Request Body Code         {  "content": "정리할 문서 내용",  "format": "summary",  // summary, report, list, formal, casual  "additionalRequest": "핵심 내용만 3줄로 요약해주세요"}
+      Response Code         {  "success": true,  "formattedContent": "AI가 정리한 내용...",  "originalContent": "원본 내용..."}
+      지원 포맷summary: 요약report: 보고서 형식list: 리스트 형식formal: 격식체casual: 구어체3. 문서 수정 Code         /** * 문서 수정 * @param document 수정할 문서 객체 * @return 수정 성공 여부 */PUT /api/documents/{documentId}DocuModify(Document document)
+      코드 접기 7줄Request Body Code         {  "documentId": 1,  "title": "수정된 제목",  "content": "수정된 내용",  "tags": ["JavaScript", "Vue"],  "isPublic": true}
+      코드 접기 7줄Response Code         {  "success": true,  "message": "문서가 수정되었습니다."}
+      4. 문서 삭제 Code         /** * 문서 삭제 (소프트 삭제) * @param docuId 문서 ID * @return 삭제 성공 여부 */DELETE /api/documents/{documentId}DocuDelete(int docuId)
+      코드 접기 7줄Response Code         {  "success": true,  "message": "문서가 삭제되었습니다."}
+      5. 문서 조회 (페이징) Code         /** * 문서 목록 조회 (무한 스크롤 페이징) * @param page 페이지 정보 (pageNum, pageSize) * @return 문서 목록 */GET /api/documents?page={page}&size={size}DocuSelectPaging(Page page)
+      코드 접기 7줄Query Parameterspage: 페이지 번호 (default: 1)size: 페이지 크기 (default: 20)Response Code         {  "success": true,  "data": [    {      "documentId": 1,      "title": "문서 제목",      "content": "문서 내용...",      "tags": ["JavaScript", "React"],      "viewCount": 10,      "createdAt": "2024-01-01T10:00:00",      "updatedAt": "2024-01-02T15:30:00"    }  ],  "pagination": {    "currentPage": 1,    "pageSize": 20,    "totalElements": 100,    "totalPages": 5,    "hasNext": true  }}
+      코드 접기 21줄6. 문서 검색 Code         /** * 문서 검색 (태그, 키워드, 기간, 정렬) * @param keyword 검색 키워드 * @param sort 정렬 기준 * @return 검색 결과 */GET /api/documents/searchDocuSearch(String keyword, String sort)
+      코드 접기 8줄Query Parameterskeyword: 검색 키워드 (제목, 내용)tags: 태그 (쉼표로 구분, 예: JavaScript,React)startDate: 시작 날짜 (예: 2024-01-01)endDate: 종료 날짜 (예: 2024-12-31)sort: 정렬 기준
+created_asc: 등록일 오름차순
+created_desc: 등록일 내림차순 (기본값)
+updated_asc: 수정일 오름차순
+updated_desc: 수정일 내림차순
+view_desc: 조회수 내림차순
 
-요구사항
-1. 문자 작성
-   - 제목 / 내용 작성
-   - 태그 설정
-   - ai 이용한 내용 정리 / 포매팅
-      - 원하는 글 형식으로 선택
-      - ai에게 추가 요청
-2. 문서 수정
-   - 제목 / 내용 수정
-   - 태그 수정
-   - ai 이용한 내용 수정
-3. 문서 삭제
-4. 문서 조회
-   - 등록순 조회(기본), 페이징(무한 스크롤)
-   - 태그 사용 검색 , 기간 검색 , 기간 오름차순 / 내림 차순
-5. 회원 기능
-   - 로그인
-  
-
-
-자바 api
-문서 작성
- - DocuSave(Document docu)
- - gemiCall(AiRequest request)
-문서 수정
- - DocuModify(Document docu)
-문서 삭제
- - DocuDelete(int DocuId)
-문서 조회
- - DocuSelectPaging(Page page)
- - DocuSearch(String KeyWord, String sort)
-로그인   
-
-
-DB erd
-users (1) ──────< (N) documents
-                         │
-                         │
-                         └──< (N) document_tags >──(N) tags (기준 정보)
+Request Example Code         GET /api/documents/search?tags=JavaScript,React&startDate=2024-01-01&endDate=2024-12-31&sort=created_desc
+      Response Code         {  "success": true,  "data": [    {      "documentId": 1,      "title": "React 입문 가이드",      "content": "React는...",      "tags": ["JavaScript", "React", "프론트엔드"],      "createdAt": "2024-06-15T10:00:00"    }  ],  "totalCount": 15}
+      코드 접기 13줄회원 관련 API1. 카카오 로그인 Code         /** * 카카오 OAuth 로그인 * @param code 카카오 인가 코드 * @return JWT 토큰 */POST /api/auth/kakao/loginkakaoLogin(String code)
+      코드 접기 7줄Request Body Code         {  "code": "카카오_인가_코드"}
+      Response Code         {  "success": true,  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",  "user": {    "userId": 1,    "nickname": "홍길동",    "email": "user@kakao.com",    "profileImage": "https://..."  }}
+      코드 접기 10줄2. 로그아웃 Code         /** * 로그아웃 * @return 로그아웃 성공 여부 */POST /api/auth/logoutlogout()
+      🗂️ 프로젝트 구조 Code         DocuTag/├── frontend/│   ├── public/│   │   └── index.html│   └── src/│       ├── components/│       │   ├── DocumentEditor.jsx      # 문서 작성/수정│       │   ├── DocumentList.jsx        # 문서 목록│       │   ├── TagSelector.jsx         # 태그 선택│       │   ├── AIFormatter.jsx         # AI 포매팅│       │   └── SearchBar.jsx           # 검색│       ├── pages/│       │   ├── HomePage.jsx│       │   ├── LoginPage.jsx│       │   └── DocumentDetailPage.jsx│       ├── services/│       │   ├── documentService.js│       │   ├── aiService.js│       │   └── authService.js│       ├── App.jsx│       └── index.js│├── backend/│   └── src/main/java/com/docutag/│       ├── controller/│       │   ├── DocumentController.java│       │   ├── AIController.java│       │   └── AuthController.java│       ├── service/│       │   ├── DocumentService.java│       │   ├── GeminiService.java│       │   └── KakaoAuthService.java│       ├── repository/│       │   ├── DocumentMapper.java│       │   ├── TagMapper.java│       │   └── UserMapper.java│       ├── model/│       │   ├── Document.java│       │   ├── Tag.java│       │   ├── User.java│       │   ├── AiRequest.java│       │   └── Page.java│       └── config/│           ├── SecurityConfig.java│           └── MyBatisConfig.java│├── database/│   └── schema.sql│├── .gitignore├── README.md└── package.json
+      코드 접기 52줄🚀 설치 및 실행사전 요구사항Node.js 14+Java 11+MySQL 8.0+Kakao Developers 앱 등록Google Gemini API Key환경 변수 설정Backend (application.yml) Code         spring:  datasource:    url: jdbc:mysql://localhost:3306/docutag    username: your_username    password: your_password    oauth:  kakao:    client-id: your_kakao_client_id    client-secret: your_kakao_client_secret    redirect-uri: http://localhost:3000/auth/kakao/callback    ai:  gemini:    api-key: your_gemini_api_key
+      코드 접기 15줄Frontend (.env) Code         REACT_APP_API_URL=http://localhost:8080/apiREACT_APP_KAKAO_CLIENT_ID=your_kakao_client_idREACT_APP_KAKAO_REDIRECT_URI=http://localhost:3000/auth/kakao/callback
+      데이터베이스 설정 Code         # MySQL 접속mysql -u root -p # 데이터베이스 생성CREATE DATABASE docutag CHARACTER SET utf8mb4 COLLATE
