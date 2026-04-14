@@ -58,9 +58,7 @@ DocuTag는 사용자가 문서를 작성하고 태그로 분류하여 효율적�
 ### Authentication
 - Kakao OAuth 2.0
 
-users (1) ──────< (N) documents
-                       │
-                       └──< (N) document_tags >──(N) tags
+users (1) ──────< (N) documents ───< (N) document_tags >──(N) tags
 
 ---
 
