@@ -34,7 +34,6 @@ DocuTag는 사용자가 문서를 작성하고 태그로 분류하여 효율적�
 
 ### 👤 회원 기능
 - 카카오 OAuth 로그인
-- 회원별 문서 관리
 
 ---
 
@@ -107,3 +106,11 @@ CREATE TABLE document_tags (
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE,
 );
 
+
+4/14 : 프로젝트 설계, 개발 환경 세팅, DB 테이블 생성, 기본 정보(tag) insert, api 구현
+4/15 : 자바 CRUD api 구현, 프론트 구현
+4/16 : 로그인 구현, 제미나이 api 세팅, 테스트
+4/17 : 제미나이 기능 구현, 테스트 코드 작성
+4/18 : aws 인프라 설계/조사 , 초기 세팅
+4/19 : 배포 환경 세팅
+4/20 : 마무리 / 통합 테스트
