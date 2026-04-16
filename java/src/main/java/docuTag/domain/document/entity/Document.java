@@ -25,7 +25,7 @@ public class Document {
     private Long documentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_document_user"))
+    @JoinColumn(name = "user_id", nullable = true, foreignKey = @ForeignKey(name = "fk_document_user"))
     private User user;
 
     @Column(name = "title", nullable = false, length = 200)

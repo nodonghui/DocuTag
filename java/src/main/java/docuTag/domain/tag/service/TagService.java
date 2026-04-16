@@ -4,8 +4,11 @@ import docuTag.domain.tag.entity.Tag;
 import docuTag.domain.tag.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,5 +31,9 @@ public class TagService {
                 .orElseGet(() -> tagRepository.save(
                         Tag.builder().tagName(tagName).build()
                 ));
+    }
+
+    public List<String> findTagNamesByDocumentId(Long documentId) {
+        return tagRepository.findTagNamesByDocumentId(documentId);
     }
 }

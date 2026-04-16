@@ -1,44 +1,62 @@
 // components/WriteModal.jsx
 import { useState } from "react";
+import TagBar from "./TagBar";
+import { createDocument } from "../api/documentApi";
 
-export default function WriteModal({ allTags, onClose, onSubmit }) {
+export default function WriteModal({ onClose, onSubmit }) {
   const [title, setTitle] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState([]);
 
-  const toggleTag = (tag) =>
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+  const handleAddTag = (tag) => {
+    if (tags.includes(tag)) return;
+    setTags((prev) => [...prev, tag]);
+  };
 
-  const handleSubmit = () => {
+  const handleRemoveTag = (tag) => {
+    setTags((prev) => prev.filter((t) => t !== tag));
+  };
+
+  const handleSubmit = async () => {
     if (!title.trim()) return;
-    onSubmit({ title, tags: selectedTags });
+
+    try {
+      await createDocument({ title, content, tags });
+      console.log("api 전송 성공");
+      onSubmit({ title, content, tags }); // 성공 시 부모에 알림
+      console.log("모달 닫기 성공");
+    } catch (e) {
+      console.error(e);
+      console.log("모달 create api 에러 발생");
+    }
+
     setTitle("");
-    setSelectedTags([]);
+    setContent("");
+    setTags([]);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-title">새 문서 작성</div>
+
         <input
           className="modal-input"
           placeholder="문서 제목"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <div className="modal-tag-label">태그 선택</div>
-        <div className="modal-tags">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              className={`modal-tag-btn${selectedTags.includes(tag) ? " selected" : ""}`}
-              onClick={() => toggleTag(tag)}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+
+        <textarea
+          className="modal-textarea"
+          placeholder="본문 내용을 입력하세요..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+
+        <div className="modal-tag-label">태그</div>
+        <TagBar tags={tags} onRemove={handleRemoveTag} onAdd={handleAddTag} />
+
         <div className="modal-actions">
           <button className="btn-cancel" onClick={onClose}>취소</button>
           <button className="btn-confirm" onClick={handleSubmit} disabled={!title.trim()}>

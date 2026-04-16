@@ -11,14 +11,17 @@ import java.util.List;
 @NoArgsConstructor
 public class DocumentSearchResponse {
 
-    // 실제 데이터 목록
-    private List<Document> documents;
+    private List<DocumentDto> documents;
+    private long lastId;
+    private boolean hasNext;
 
-    public DocumentSearchResponse(List<Document> documents) {
+    private DocumentSearchResponse(List<DocumentDto> documents, long lastId, boolean hasNext) {
         this.documents = documents;
+        this.lastId = lastId;
+        this.hasNext = hasNext;
     }
 
-    public static DocumentSearchResponse of(List<Document> documents) {
-        return new DocumentSearchResponse(documents);
+    public static DocumentSearchResponse of(List<DocumentDto> documents, long lastId, boolean hasNext) {
+        return new DocumentSearchResponse(documents, lastId, hasNext);
     }
 }
