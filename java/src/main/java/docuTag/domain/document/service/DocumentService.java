@@ -11,6 +11,7 @@ import docuTag.domain.tag.entity.Tag;
 import docuTag.domain.tag.service.TagService;
 import docuTag.domain.user.entity.User;
 
+import docuTag.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,11 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final TagService tagService;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public DocumentSearchResponse getDocuments(List<String> tags, String title, Long lastId, int size) {
-        // 1. 페이징/필터링용 (id만 뽑기)
-        List<Document> documents = fetchDocuments(tags, title, lastId, size + 1);
+    public DocumentSearchResponse getDocuments(List<String> tags, String title, Long lastId, int size, Long userId) {
+        List<Document> documents = fetchDocuments(tags, title, lastId, size + 1, userId);
 
         boolean hasNext = documents.size() == size + 1;
         if (hasNext) {
@@ -42,12 +43,11 @@ public class DocumentService {
             return DocumentSearchResponse.of(List.of(), 0L, false);
         }
 
-        // 2. id 목록으로 fetch join 재조회 (N+1 해결)
         List<Long> ids = documents.stream()
                 .map(Document::getDocumentId)
                 .toList();
 
-        List<Document> documentsWithTags = documentRepository.findByIdsWithTags(ids);
+        List<Document> documentsWithTags = documentRepository.findByIdsWithTags(ids, userId);
 
         long nextLastId = documentsWithTags.getLast().getDocumentId();
 
@@ -59,75 +59,62 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    private List<Document> fetchDocuments(List<String> tagNames,String title, Long lastId, int pageSize) {
+    private List<Document> fetchDocuments(List<String> tagNames, String title, Long lastId, int pageSize, Long userId) {
         if (tagNames.isEmpty()) {
-            return documentRepository.findDocumentsWithPaging(title,lastId, pageSize);
+            return documentRepository.findDocumentsWithPaging(userId, title, lastId, pageSize);
         }
         if (tagNames.size() == 1) {
-            return documentRepository.findDocumentsByTagWithPaging(tagNames.getFirst(),title, lastId, pageSize);
+            return documentRepository.findDocumentsByTagWithPaging(userId, tagNames.getFirst(), title, lastId, pageSize);
         }
-        return documentRepository.findDocumentsByTagsWithPaging(tagNames,title, lastId, pageSize);
+        return documentRepository.findDocumentsByTagsWithPaging(userId, tagNames, title, lastId, pageSize);
     }
 
-    // DocumentService.java
     @Transactional(readOnly = true)
     public DocumentDto getDocument(Long id, Long userId) {
-        Document document = documentRepository.findByIdWithTags(id) // findById → findByIdWithTags
+        Document document = documentRepository.findByIdWithTags(id, userId)
                 .orElseThrow(() -> new NoSuchElementException("Document not found: " + id));
-
-        if(!document.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("접근 권한이 없습니다.");
-        }
-
         return DocumentDto.from(document);
     }
 
-
-
     @Transactional
-    public void createDocument(DocumentCreateRequest request) {
-        //쿠기 값으로 USER 조회/ 인가
-        User user = null;
+    public void createDocument(DocumentCreateRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("유저를 찾을 수 없습니다."));
+
         Document document = Document.from(request, user);
         documentRepository.save(document);
-        log.error("document 객체 저장 성공");
+        log.info("document 객체 저장 성공");
 
-        if(request.getTags() != null) {
+        if (request.getTags() != null) {
             request.getTags().forEach(tagName -> {
                 Tag tag = tagService.findOrCreate(tagName);
                 document.addTag(tag);
             });
         }
-        log.error("document_tag 객체 저장 성공");
+        log.info("document_tag 객체 저장 성공");
     }
 
-
     @Transactional
-    public void updateDocument(Long id, DocumentUpdateRequest request) {
-        // 1. 문서 조회 (DocumentTag + Tag 한 번에 fetch)
-        Document document = documentRepository.findByIdWithTags(id)
+    public void updateDocument(Long id, DocumentUpdateRequest request, Long userId) {
+        Document document = documentRepository.findByIdWithTags(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다. id: " + id));
 
-        // 2. 제목, 내용 수정
         document.updateDocument(request.getTitle(), request.getContent());
 
-        // 3. 현재 태그를 Map으로 캐싱 (재조회 방지)
         Map<String, Tag> currentTagMap = document.getDocumentTags().stream()
                 .collect(Collectors.toMap(
                         dt -> dt.getTag().getTagName(),
-                        DocumentTag::getTag  // DocumentTag::getTag → 람다로 변경
+                        DocumentTag::getTag
                 ));
 
         Set<String> newTagNameSet = request.getTags() != null
                 ? new HashSet<>(request.getTags())
                 : Collections.emptySet();
 
-        // 4. 삭제: 이미 로딩된 객체 재사용 (DB 조회 없음)
         currentTagMap.entrySet().stream()
                 .filter(e -> !newTagNameSet.contains(e.getKey()))
-                .forEach(e -> document.removeTag(e.getValue())); // ← 추가 SELECT 없음
+                .forEach(e -> document.removeTag(e.getValue()));
 
-        // 5. 추가: 현재 없는 것만
         newTagNameSet.stream()
                 .filter(name -> !currentTagMap.containsKey(name))
                 .forEach(name -> {
@@ -137,8 +124,8 @@ public class DocumentService {
     }
 
     @Transactional
-    public void deleteDocument(Long id) {
-        Document document = documentRepository.findById(id)
+    public void deleteDocument(Long id, Long userId) {
+        Document document = documentRepository.findByIdWithTags(id, userId)
                 .orElseThrow(() -> new RuntimeException("문서를 찾을 수 없습니다. id: " + id));
         documentRepository.delete(document);
     }

@@ -12,16 +12,17 @@ import java.util.Optional;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-
     @Query(value = """
     SELECT d.*
     FROM documents d
-    WHERE (:lastId IS NULL OR d.document_id < :lastId)
+    WHERE d.user_id = :userId
+        AND (:lastId IS NULL OR d.document_id < :lastId)
         AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
     ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsWithPaging(
+            @Param("userId") Long userId,
             @Param("title") String title,
             @Param("lastId") Long lastId,
             @Param("size") int size
@@ -32,13 +33,15 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     FROM documents d
     JOIN document_tags dt ON d.document_id = dt.document_id
     JOIN tags t ON dt.tag_id = t.tag_id
-    WHERE t.tag_name = :tag
+    WHERE d.user_id = :userId
+        AND t.tag_name = :tag
         AND (:lastId IS NULL OR d.document_id < :lastId)
         AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
     ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsByTagWithPaging(
+            @Param("userId") Long userId,
             @Param("tag") String tag,
             @Param("title") String title,
             @Param("lastId") Long lastId,
@@ -48,19 +51,21 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     @Query(value = """
     SELECT d.*
     FROM documents d
-    WHERE EXISTS (
-        SELECT 1
-        FROM document_tags dt
-        JOIN tags t ON dt.tag_id = t.tag_id
-        WHERE dt.document_id = d.document_id
-            AND t.tag_name IN (:tags)
-    )
-    AND (:lastId IS NULL OR d.document_id < :lastId)
-    AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
+    WHERE d.user_id = :userId
+        AND EXISTS (
+            SELECT 1
+            FROM document_tags dt
+            JOIN tags t ON dt.tag_id = t.tag_id
+            WHERE dt.document_id = d.document_id
+                AND t.tag_name IN (:tags)
+        )
+        AND (:lastId IS NULL OR d.document_id < :lastId)
+        AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
     ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsByTagsWithPaging(
+            @Param("userId") Long userId,
             @Param("tags") List<String> tags,
             @Param("title") String title,
             @Param("lastId") Long lastId,
@@ -72,16 +77,23 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     LEFT JOIN FETCH d.documentTags dt
     LEFT JOIN FETCH dt.tag
     WHERE d.documentId = :id
+        AND d.user.userId = :userId
     """)
-    Optional<Document> findByIdWithTags(@Param("id") Long id);
-
+    Optional<Document> findByIdWithTags(
+            @Param("id") Long id,
+            @Param("userId") Long userId
+    );
 
     @Query("""
     SELECT d FROM Document d
     LEFT JOIN FETCH d.documentTags dt
     LEFT JOIN FETCH dt.tag
     WHERE d.documentId IN :ids
+        AND d.user.userId = :userId
     ORDER BY d.createdAt DESC
     """)
-    List<Document> findByIdsWithTags(@Param("ids") List<Long> ids);
+    List<Document> findByIdsWithTags(
+            @Param("ids") List<Long> ids,
+            @Param("userId") Long userId
+    );
 }

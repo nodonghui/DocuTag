@@ -26,25 +26,13 @@ public class DataInitializer implements ApplicationRunner {
 
 
     public void run(ApplicationArguments args) {
-        /*
+
         if (documentRepository.count() > 0) {
             log.info("[DataInitializer] 이미 데이터가 존재합니다. 초기화를 건너뜁니다.");
             return;
         }
 
         log.info("[DataInitializer] 테스트 데이터 삽입 시작...");
-
-        // 1. 유저 세팅 (DB에 있는 실제 유저)
-        User user = userRepository.findById(1L)
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .userId(1L)
-                                .oauthProvider("kakao")
-                                .kakaoId(3900340238L)
-                                .nickname("노동희")
-                                .email("rdh0427@naver.com")
-                                .build()
-                ));
 
         // 2. 태그 생성
         List<Tag> tags = tagRepository.saveAll(List.of(
@@ -109,7 +97,7 @@ public class DataInitializer implements ApplicationRunner {
 
         for (DocSeed seed : seeds) {
             Document doc = Document.builder()
-                    .user(user)   // ← 유저 세팅
+                    .user(null)   // ← 유저 세팅
                     .title(seed.title())
                     .content(seed.content())
                     .build();
@@ -121,6 +109,6 @@ public class DataInitializer implements ApplicationRunner {
 
         log.info("[DataInitializer] 테스트 데이터 삽입 완료! 문서 {}건 생성됨", documentRepository.count());
 
-         */
+
     }
 }
