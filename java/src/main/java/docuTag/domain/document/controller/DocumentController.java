@@ -5,6 +5,7 @@ import docuTag.domain.document.dto.DocumentDto;
 import docuTag.domain.document.dto.DocumentSearchResponse;
 import docuTag.domain.document.dto.DocumentUpdateRequest;
 import docuTag.domain.document.service.DocumentService;
+import docuTag.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final JwtUtil jwtUtil;
 
 
     // 전체 조회
@@ -36,8 +38,12 @@ public class DocumentController {
 
     // DocumentController.java
     @GetMapping("/{id}")
-    public ResponseEntity<DocumentDto> getDocument(@PathVariable Long id) {
-        DocumentDto documentResponse = documentService.getDocument(id);
+    public ResponseEntity<DocumentDto> getDocument(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+
+        Long userId = jwtUtil.getUserId(authHeader.replace("Bearer ", ""));
+        DocumentDto documentResponse = documentService.getDocument(id, userId);
         return ResponseEntity.ok(documentResponse);
     }
 

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
@@ -17,7 +18,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     FROM documents d
     WHERE (:lastId IS NULL OR d.document_id < :lastId)
         AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
-    ORDER BY d.created_at DESC
+    ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsWithPaging(
@@ -34,7 +35,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     WHERE t.tag_name = :tag
         AND (:lastId IS NULL OR d.document_id < :lastId)
         AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
-    ORDER BY d.created_at DESC
+    ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsByTagWithPaging(
@@ -56,7 +57,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     )
     AND (:lastId IS NULL OR d.document_id < :lastId)
     AND (:title IS NULL OR d.title LIKE CONCAT('%', :title, '%'))
-    ORDER BY d.created_at DESC
+    ORDER BY d.document_id DESC
     LIMIT :size
     """, nativeQuery = true)
     List<Document> findDocumentsByTagsWithPaging(
@@ -65,4 +66,22 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
             @Param("lastId") Long lastId,
             @Param("size") int size
     );
+
+    @Query("""
+    SELECT d FROM Document d
+    LEFT JOIN FETCH d.documentTags dt
+    LEFT JOIN FETCH dt.tag
+    WHERE d.documentId = :id
+    """)
+    Optional<Document> findByIdWithTags(@Param("id") Long id);
+
+
+    @Query("""
+    SELECT d FROM Document d
+    LEFT JOIN FETCH d.documentTags dt
+    LEFT JOIN FETCH dt.tag
+    WHERE d.documentId IN :ids
+    ORDER BY d.createdAt DESC
+    """)
+    List<Document> findByIdsWithTags(@Param("ids") List<Long> ids);
 }

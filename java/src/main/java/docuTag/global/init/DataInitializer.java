@@ -4,6 +4,8 @@ import docuTag.domain.document.entity.Document;
 import docuTag.domain.document.repository.DocumentRepository;
 import docuTag.domain.tag.entity.Tag;
 import docuTag.domain.tag.repository.TagRepository;
+import docuTag.domain.user.entity.User;
+import docuTag.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -13,17 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DataInitializer implements ApplicationRunner {
 
-    private final TagRepository tagRepository;
     private final DocumentRepository documentRepository;
+    private final TagRepository tagRepository;
+    private final UserRepository userRepository;
 
-    @Override
-    @Transactional
+
     public void run(ApplicationArguments args) {
+        /*
         if (documentRepository.count() > 0) {
             log.info("[DataInitializer] 이미 데이터가 존재합니다. 초기화를 건너뜁니다.");
             return;
@@ -31,6 +34,19 @@ public class DataInitializer implements ApplicationRunner {
 
         log.info("[DataInitializer] 테스트 데이터 삽입 시작...");
 
+        // 1. 유저 세팅 (DB에 있는 실제 유저)
+        User user = userRepository.findById(1L)
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .userId(1L)
+                                .oauthProvider("kakao")
+                                .kakaoId(3900340238L)
+                                .nickname("노동희")
+                                .email("rdh0427@naver.com")
+                                .build()
+                ));
+
+        // 2. 태그 생성
         List<Tag> tags = tagRepository.saveAll(List.of(
                 Tag.builder().tagName("Java").build(),
                 Tag.builder().tagName("Spring").build(),
@@ -55,7 +71,7 @@ public class DataInitializer implements ApplicationRunner {
         Tag tagAWS      = tags.get(8);
         Tag tagCICD     = tags.get(9);
 
-        // 3. 문서 30개 생성 및 태그 연결
+        // 3. 문서 생성
         record DocSeed(String title, String content, Tag[] tags) {}
 
         List<DocSeed> seeds = List.of(
@@ -93,7 +109,7 @@ public class DataInitializer implements ApplicationRunner {
 
         for (DocSeed seed : seeds) {
             Document doc = Document.builder()
-                    .user(null)
+                    .user(user)   // ← 유저 세팅
                     .title(seed.title())
                     .content(seed.content())
                     .build();
@@ -104,5 +120,7 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         log.info("[DataInitializer] 테스트 데이터 삽입 완료! 문서 {}건 생성됨", documentRepository.count());
+
+         */
     }
 }

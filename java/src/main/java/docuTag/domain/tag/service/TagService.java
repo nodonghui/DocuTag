@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class TagService {
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found. tagName: " + tagName));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public Tag findOrCreate(String tagName) {
         return tagRepository.findByTagName(tagName)
                 .orElseGet(() -> tagRepository.save(

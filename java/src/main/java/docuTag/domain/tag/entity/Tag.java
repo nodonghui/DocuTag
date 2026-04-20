@@ -7,7 +7,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "tags",
+        indexes = {
+                @Index(name = "idx_tags_tag_name", columnList = "tag_name")
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
