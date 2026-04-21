@@ -3,6 +3,7 @@ package docuTag.domain.kakao.service;
 import docuTag.domain.kakao.dto.KakaoUserResponseDto;
 import docuTag.domain.user.entity.User;
 import docuTag.domain.user.repository.UserRepository;
+import docuTag.global.exception.KakaoApiException;
 import docuTag.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
@@ -49,8 +53,8 @@ public class KakaoAuthService {
 
     // 2단계: 인가 코드 → 액세스 토큰
     public String getAccessToken(String code) {
-        log.error("getAccessToken()");
-        log.error("url : " + code);
+        log.info("getAccessToken() code: {}", code);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -61,33 +65,45 @@ public class KakaoAuthService {
         body.add("redirect_uri", redirectUri);
         body.add("code", code);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "https://kauth.kakao.com/oauth/token",
-                new HttpEntity<>(body, headers),
-                Map.class
-        );
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    "https://kauth.kakao.com/oauth/token",
+                    new HttpEntity<>(body, headers),
+                    Map.class
+            );
+            return (String) response.getBody().get("access_token");
 
-        return (String) response.getBody().get("access_token");
+        } catch (HttpClientErrorException e) {
+            handleKakaoError(e, "액세스 토큰 요청");
+            return null; // 도달 안함
+        } catch (HttpServerErrorException e) {
+            handleKakaoServerError(e, "액세스 토큰 요청");
+            return null;
+        }
     }
 
     public KakaoUserInfo getKakaoUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
 
-        ResponseEntity<KakaoUserResponseDto> response = restTemplate.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                KakaoUserResponseDto.class  // ← DTO로 변경
-        );
+        try {
+            ResponseEntity<KakaoUserResponseDto> response = restTemplate.exchange(
+                    "https://kapi.kakao.com/v2/user/me",
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    KakaoUserResponseDto.class
+            );
 
-        KakaoUserResponseDto dto = response.getBody();
+            KakaoUserResponseDto dto = response.getBody();
+            return new KakaoUserInfo(dto.getId(), dto.getEmail(), dto.getNickname());
 
-        return new KakaoUserInfo(
-                dto.getId(),
-                dto.getEmail(),
-                dto.getNickname()
-        );
+        } catch (HttpClientErrorException e) {
+            handleKakaoError(e, "사용자 정보 요청");
+            return null;
+        } catch (HttpServerErrorException e) {
+            handleKakaoServerError(e, "사용자 정보 요청");
+            return null;
+        }
     }
 
     // 신규면 가입, 기존이면 로그인
@@ -103,5 +119,56 @@ public class KakaoAuthService {
                 ));
 
         return jwtUtil.createToken(user.getUserId());
+    }
+
+    private void handleKakaoError(HttpClientErrorException e, String context) {
+        int httpStatus = e.getStatusCode().value();
+        String responseBody = e.getResponseBodyAsString();
+        int kakaoCode = extractKakaoCode(responseBody);
+
+        log.error("[{}] 카카오 API 오류 - HTTP: {}, kakaoCode: {}, body: {}",
+                context, httpStatus, kakaoCode, responseBody);
+
+        // 카카오 에러코드별 처리 (여기에 계속 추가)
+        switch (kakaoCode) {
+            case -401  -> throw new KakaoApiException("유효하지 않은 앱키 또는 액세스 토큰", httpStatus, kakaoCode);
+            case -2    -> throw new KakaoApiException("필수 파라미터 누락 또는 타입 오류", httpStatus, kakaoCode);
+            case -3    -> throw new KakaoApiException("API 기능 미활성화 또는 설정 누락", httpStatus, kakaoCode);
+            case -4    -> throw new KakaoApiException("제재된 계정", httpStatus, kakaoCode);
+            case -5    -> throw new KakaoApiException("API 요청 권한 없음", httpStatus, kakaoCode);
+            case -10   -> throw new KakaoApiException("요청 횟수 초과 (Rate Limit)", httpStatus, kakaoCode);
+            case -101  -> throw new KakaoApiException("카카오계정 연결 필요", httpStatus, kakaoCode);
+            case -402  -> throw new KakaoApiException("사용자 동의 필요", httpStatus, kakaoCode);
+            case -406  -> throw new KakaoApiException("14세 미만 사용자 접근 불가", httpStatus, kakaoCode);
+            case -903  -> throw new KakaoApiException("등록되지 않은 앱키", httpStatus, kakaoCode);
+            // 분류 안된 에러 → 로그 남기고 추후 추가
+            default    -> throw new KakaoApiException("카카오 API 오류: " + kakaoCode, httpStatus, kakaoCode);
+        }
+    }
+
+    private void handleKakaoServerError(HttpServerErrorException e, String context) {
+        int httpStatus = e.getStatusCode().value();
+        String responseBody = e.getResponseBodyAsString();
+        int kakaoCode = extractKakaoCode(responseBody);
+
+        log.error("[{}] 카카오 서버 오류 - HTTP: {}, kakaoCode: {}", context, httpStatus, kakaoCode);
+
+        switch (kakaoCode) {
+            case -1    -> throw new KakaoApiException("카카오 서버 내부 오류 (재시도 필요)", httpStatus, kakaoCode);
+            case -7    -> throw new KakaoApiException("카카오 서비스 점검 중", httpStatus, kakaoCode);
+            case -9798 -> throw new KakaoApiException("카카오 서비스 점검 중", httpStatus, kakaoCode);
+            default    -> throw new KakaoApiException("카카오 서버 오류: " + kakaoCode, httpStatus, kakaoCode);
+        }
+    }
+
+    /** 카카오 응답 body에서 code 추출 */
+    private int extractKakaoCode(String responseBody) {
+        try {
+            Map<String, Object> map = new ObjectMapper().readValue(responseBody, Map.class);
+            return (int) map.getOrDefault("code", 0);
+        } catch (Exception e) {
+            log.warn("카카오 에러 코드 파싱 실패: {}", responseBody);
+            return 0;
+        }
     }
 }

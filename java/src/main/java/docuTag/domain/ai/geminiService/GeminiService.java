@@ -46,15 +46,68 @@ public class GeminiService {
                 return response == null ? "default" : response.text();
 
             } catch (Exception e) {
-                if ( !(e.getMessage().contains("429") || e.getMessage().contains("503")) ) {
-                    log.error("Gemini API 호출 실패: {}", e.getMessage());
-                    return "default";
+                if (!handleException(e, i, maxRetry)) {
+                    return "default"; // 재시도 불필요한 예외 → 즉시 종료
                 }
-                log.warn("429 감지 — {}초 후 재시도 ({}/{})", (i + 1) * 5, i + 1, maxRetry);
-                try { Thread.sleep(5000L * (i + 1)); }
-                catch (InterruptedException ignored) {}
+                // handleException이 true → 재시도 대기
             }
         }
+
+        log.error("Gemini API 최대 재시도 초과");
         return "default";
+    }
+
+    /**
+     * 예외를 분류하고 처리합니다.
+     * @return true  → 재시도 가능 (잠시 대기 후 재시도)
+     * @return false → 재시도 불필요 (즉시 실패 처리)
+     */
+    private boolean handleException(Exception e, int attempt, int maxRetry) {
+        String message = e.getMessage() != null ? e.getMessage() : "";
+
+        //재시도 가능한 예외 (여기에 계속 추가)
+        if (isRetryable(message)) {
+            long waitSeconds = (attempt + 1) * 5L;
+            log.warn("재시도 가능한 오류 감지 [{}] — {}초 후 재시도 ({}/{})",
+                    message, waitSeconds, attempt + 1, maxRetry);
+            sleep(waitSeconds * 1000);
+            return true;
+        }
+
+        //즉시 실패 처리할 예외 (여기에 계속 추가)
+        if (isFatal(message)) {
+            log.error("복구 불가능한 오류 [{}]", message);
+            return false;
+        }
+
+        // 분류되지 않은 예외 → 로그 남기고 즉시 실패
+        log.error("분류되지 않은 Gemini 오류: {} ({})", message, e.getClass().getSimpleName());
+        return false;
+    }
+
+    /** 재시도 가능한 오류 조건 */
+    private boolean isRetryable(String message) {
+        return message.contains("429")   // Rate Limit
+                || message.contains("503");  // 서비스 일시 불가
+        // 추가 예시:
+        // || message.contains("500")   // 서버 내부 오류
+        // || message.contains("UNAVAILABLE")
+    }
+
+    /** 즉시 실패 처리할 오류 조건 */
+    private boolean isFatal(String message) {
+        return message.contains("403")   // API 키 문제
+                || message.contains("400");  // 잘못된 요청
+        // 추가 예시:
+        // || message.contains("404")   // 모델명 오류
+        // || message.contains("API_KEY_INVALID")
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
