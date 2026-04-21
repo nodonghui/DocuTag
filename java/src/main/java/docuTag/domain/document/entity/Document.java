@@ -14,7 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "documents",
         indexes = {
-                @Index(name = "idx_documents_created_at", columnList = "created_at DESC")
+                @Index(name = "idx_user_document", columnList = "user_id, document_id DESC")
         }
 )
 @Getter

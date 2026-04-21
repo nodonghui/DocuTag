@@ -4,6 +4,7 @@ import docuTag.domain.tag.entity.Tag;
 import docuTag.domain.tag.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,12 +27,19 @@ public class TagService {
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found. tagName: " + tagName));
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     public Tag findOrCreate(String tagName) {
         return tagRepository.findByTagName(tagName)
-                .orElseGet(() -> tagRepository.save(
-                        Tag.builder().tagName(tagName).build()
-                ));
+                .orElseGet(() -> {
+                    try {
+                        return tagRepository.save(
+                                Tag.builder().tagName(tagName).build()
+                        );
+                    } catch (DataIntegrityViolationException e) {
+                        // 동시 삽입 충돌 → 이미 저장된 것 조회
+                        return tagRepository.findByTagName(tagName)
+                                .orElseThrow();
+                    }
+                });
     }
 
     public List<String> findTagNamesByDocumentId(Long documentId) {

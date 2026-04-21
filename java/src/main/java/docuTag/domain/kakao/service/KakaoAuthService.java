@@ -8,8 +8,10 @@ import docuTag.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -106,19 +108,34 @@ public class KakaoAuthService {
         }
     }
 
-    // 신규면 가입, 기존이면 로그인
+    @Transactional
     public String loginOrRegister(KakaoUserInfo info) {
-        User user = userRepository.findByKakaoId(info.kakaoId())
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .oauthProvider("kakao")
-                                .kakaoId(info.kakaoId())
-                                .email(info.email())
-                                .nickname(info.nickname())
-                                .build()
-                ));
-
+        User user = findOrCreateUser(info);
         return jwtUtil.createToken(user.getUserId());
+    }
+
+    private User findOrCreateUser(KakaoUserInfo info) {
+        return userRepository.findByKakaoId(info.kakaoId())
+                .orElseGet(() -> createUser(info));
+    }
+
+    private User createUser(KakaoUserInfo info) {
+        try {
+            return userRepository.save(
+                    User.builder()
+                            .oauthProvider("kakao")
+                            .kakaoId(info.kakaoId())
+                            .email(info.email())
+                            .nickname(info.nickname())
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청으로 인한 중복 저장 시도 → 이미 저장된 유저 반환
+            return userRepository.findByKakaoId(info.kakaoId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "유저 저장 실패 및 조회 불가. kakaoId: " + info.kakaoId(), e
+                    ));
+        }
     }
 
     private void handleKakaoError(HttpClientErrorException e, String context) {

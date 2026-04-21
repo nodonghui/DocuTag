@@ -58,7 +58,7 @@ public class DocumentService {
         return DocumentSearchResponse.of(documentDtos, nextLastId, hasNext);
     }
 
-    @Transactional(readOnly = true)
+
     private List<Document> fetchDocuments(List<String> tagNames, String title, Long lastId, int pageSize, Long userId) {
         if (tagNames.isEmpty()) {
             return documentRepository.findDocumentsWithPaging(userId, title, lastId, pageSize);
