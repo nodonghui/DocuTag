@@ -27,68 +27,78 @@ jobs:
           mkdir -p src/main/resources
           cat > src/main/resources/application.properties << EOF
           spring.application.name=demo
-          
+
           spring.datasource.url=${{ secrets.DB_URL }}
           spring.datasource.username=docutag_user
           spring.datasource.password=${{ secrets.DB_PASSWORD }}
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-          
+
           spring.jpa.hibernate.ddl-auto=update
           spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
           spring.jpa.properties.hibernate.format_sql=true
-          
+
           logging.level.org.hibernate.SQL=DEBUG
           logging.level.org.hibernate.orm.jdbc.bind=TRACE
-          
+
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          
+
           kakao.client-id=${{ secrets.KAKAO_CLIENT_ID }}
           kakao.client-secret=${{ secrets.KAKAO_CLIENT_SECRET }}
           kakao.redirect-uri=http://localhost:8080/auth/kakao/callback
-          
+
           jwt.secret=${{ secrets.JWT_SECRET }}
           EOF
 
+      # 4. 빌드
       - name: Grant execute permission for gradlew
-        run: chmod +x java/gradlew     # 실제 경로로 변경
+        run: chmod +x java/gradlew
 
       - name: Build with Gradle
-        run: cd java && ./gradlew build -x test   # cd 후 실행
+        run: cd java && ./gradlew build -x test
 
-      # 5. 기존 프로세스 종료 + 디렉토리 생성
+      # 5. SSH 키 세팅 (이후 스텝 전체에서 재사용)
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/lightsail.pem
+          chmod 600 ~/.ssh/lightsail.pem
+          ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> ~/.ssh/known_hosts
+
+      # 6. 기존 프로세스 종료 + 디렉토리 생성
       - name: Prepare server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          port: 22
-          timeout: 60s          # 30s → 60s
-          command_timeout: 10m
-          request_pty: true     # ← 핵심
-          script: |
+        run: |
+          ssh -i ~/.ssh/lightsail.pem \
+              -o ServerAliveInterval=15 \
+              -o ConnectTimeout=30 \
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
             PID=$(pgrep -f 'demo-0.0.1-SNAPSHOT.jar') && kill $PID || true
             sleep 2
             mkdir -p ~/app
+          EOF
 
-      # 6. JAR 파일 전송  ← SCP 액션 사용
+      # 7. JAR 파일 전송
       - name: Copy JAR to Lightsail
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "java/build/libs/demo-0.0.1-SNAPSHOT.jar"
-          target: "~/app"
+        run: |
+          scp -i ~/.ssh/lightsail.pem \
+              -o ServerAliveInterval=15 \
+              -o ConnectTimeout=30 \
+              java/build/libs/demo-0.0.1-SNAPSHOT.jar \
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:~/app/
 
-      # 7. JAR 실행
+      # 8. JAR 실행
       - name: Run JAR on Lightsail
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/lightsail.pem \
+              -o ServerAliveInterval=15 \
+              -o ConnectTimeout=30 \
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} << 'EOF'
             cd ~/app
             nohup java -jar demo-0.0.1-SNAPSHOT.jar > ~/app/app.log 2>&1 &
+            disown
             echo "배포 완료"
+          EOF
+
+      # 9. SSH 키 정리
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/lightsail.pem
