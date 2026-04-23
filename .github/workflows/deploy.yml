@@ -49,9 +49,11 @@ jobs:
           jwt.secret=${{ secrets.JWT_SECRET }}
           EOF
 
-      # 4. Gradle 빌드
+      - name: Grant execute permission for gradlew
+        run: chmod +x java/gradlew     # 실제 경로로 변경
+
       - name: Build with Gradle
-        run: ./java/gradlew build -x test
+        run: cd java && ./gradlew build -x test   # cd 후 실행
 
       # 5. 기존 프로세스 종료 + 디렉토리 생성
       - name: Prepare server
