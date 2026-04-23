@@ -1,0 +1,89 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치 push 시 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 코드 체크아웃
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Java 설정
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    # 3. application.properties 생성
+    - name: Create application.properties
+      run: |
+        mkdir -p java/src/main/resources
+        cat > src/main/resources/application.properties << EOF
+        spring.application.name=demo
+
+        spring.datasource.url=${{ secrets.DB_URL }}
+        spring.datasource.username=docutag_user
+        spring.datasource.password=${{ secrets.DB_PASSWORD }}
+        spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+        spring.jpa.hibernate.ddl-auto=update
+        spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+        spring.jpa.properties.hibernate.format_sql=true
+
+
+
+        logging.level.org.hibernate.SQL=DEBUG
+        logging.level.org.hibernate.orm.jdbc.bind=TRACE
+
+        GEMINI_API_KEY=${{secrets.GEMINI_API_KEY}}
+
+        kakao.client-id=${{secrets.KAKAO_CLIENT_ID}}
+        kakao.client-secret=${{secrets.KAKAO_CLIENT_SECRET}}
+        kakao.redirect-uri: http://localhost:8080/auth/kakao/callback
+
+        jwt.secret=${{ secrets.JWT_SECRET }}
+        EOF
+
+    # 4. Gradle 빌드
+    - name: Build with Gradle
+      run: ./gradlew build -x test
+
+    # 5. SSH로 JAR 전송 및 실행
+    - name: Deploy to Lightsail
+      uses: nodonghui/DocuTag@main
+      with:
+        host: ${{ secrets.LIGHTSAIL_HOST }}
+        username: ${{ secrets.LIGHTSAIL_USER }}
+        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        script: |
+          # 기존 프로세스 종료
+          pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
+          
+          # 새 JAR 파일 받을 디렉토리 생성
+          mkdir -p ~/app
+
+    - name: Copy JAR to Lightsail
+      uses: nodonghui/DocuTag@main
+      with:
+        host: ${{ secrets.LIGHTSAIL_HOST }}
+        username: ${{ secrets.LIGHTSAIL_USER }}
+        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        source: "java/build/libs/demo-0.0.1-SNAPSHOT.jar"
+        target: "~/app"
+
+    - name: Run JAR on Lightsail
+      uses: nodonghui/DocuTag@main
+      with:
+        host: ${{ secrets.LIGHTSAIL_HOST }}
+        username: ${{ secrets.LIGHTSAIL_USER }}
+        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        script: |
+          cd ~/app/build/libs
+          nohup java -jar *.jar > ~/app/app.log 2>&1 &
+          echo "배포 완료!"
