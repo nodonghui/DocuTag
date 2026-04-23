@@ -37,9 +37,6 @@ out/
 .vscode/
 
 
-build.gradle
-gradle/wrapper/gradle-wrapper.properties
 src/main/resources/application.properties
 src/main/resources/application.yml
-/gradle/
 /gradle/
