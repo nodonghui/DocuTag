@@ -63,7 +63,8 @@ jobs:
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
-            pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
+            PID=$(pgrep -f 'demo-0.0.1-SNAPSHOT.jar') && kill $PID || true
+            sleep 2
             mkdir -p ~/app
 
       # 6. JAR 파일 전송  ← SCP 액션 사용
