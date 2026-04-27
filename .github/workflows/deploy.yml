@@ -108,6 +108,7 @@ jobs:
         run: |
           cd react/docu_tag  # 폴더명 맞게 수정
           npm install
+          chmod +x node_modules/.bin/react-scripts
           npm run build
 
       # 10. React 빌드 파일 전송
