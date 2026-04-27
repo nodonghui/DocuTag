@@ -1,12 +1,13 @@
 import { useState } from "react";
 import "./styles/login.css";
-const REACT_APP_API_BASE_URL=`http://localhost:8080`
+const REACT_APP_API_BASE_URL=`${process.env.REACT_APP_API_URL}`
 const BACKEND_LOGIN_URL = REACT_APP_API_BASE_URL+`/api/auth/kakao/login`;
 
 export default function LoginPage() {
   const [hovered, setHovered] = useState(false);
 
   const handleKakaoLogin = () => {
+    console.log("login url : " + BACKEND_LOGIN_URL);
     window.location.href = BACKEND_LOGIN_URL;
   };
 

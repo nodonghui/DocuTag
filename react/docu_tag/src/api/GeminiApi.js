@@ -1,5 +1,7 @@
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 export async function createDocument({content, mode}) {
-  const response = await fetch("http://localhost:8080/api/gemini/summarize", {
+  const response = await fetch(`${BASE_URL}/api/gemini/summarize`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content, mode }),

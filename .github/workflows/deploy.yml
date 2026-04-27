@@ -44,7 +44,7 @@ jobs:
 
           kakao.client-id=${{ secrets.KAKAO_CLIENT_ID }}
           kakao.client-secret=${{ secrets.KAKAO_CLIENT_SECRET }}
-          kakao.redirect-uri=http://localhost:8080/auth/kakao/callback
+          kakao.redirect-uri=${{ secrets.KAKAO_CLIENT_URL}}
 
           jwt.secret=${{ secrets.JWT_SECRET }}
           EOF

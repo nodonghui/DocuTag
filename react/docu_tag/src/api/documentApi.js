@@ -1,10 +1,12 @@
+const BASE_URL = process.env.REACT_APP_API_URL;
+
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export async function createDocument({ title, content, tags }) {
-  const response = await fetch("http://localhost:8080/api/documents", {
+  const response = await fetch(`${BASE_URL}/api/documents`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +19,7 @@ export async function createDocument({ title, content, tags }) {
 }
 
 export const fetchDocumentById = async (id) => {
-  const response = await fetch(`http://localhost:8080/api/documents/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
     headers: { ...getAuthHeader() },
   });
   console.log("상태코드 : " + response.status);
@@ -33,7 +35,7 @@ export async function fetchDocuments({ tags, title, lastId, size }) {
   if (lastId != null) params.append("lastId", lastId);
   params.append("size", size ?? 10);
 
-  const response = await fetch(`http://localhost:8080/api/documents?${params}`, {
+  const response = await fetch(`${BASE_URL}/api/documents?${params}`, {
     headers: { ...getAuthHeader() },
   });
   if (!response.ok) throw new Error(`문서 조회 실패: ${response.status}`);
@@ -41,7 +43,7 @@ export async function fetchDocuments({ tags, title, lastId, size }) {
 }
 
 export const updateDocument = async ({ id, title, content, tags }) => {
-  const response = await fetch(`http://localhost:8080/api/documents/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -54,7 +56,7 @@ export const updateDocument = async ({ id, title, content, tags }) => {
 
 export const deleteDocument = async (id) => {
   console.log("delete id : " + id);
-  const response = await fetch(`http://localhost:8080/api/documents/${id}`, {
+  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
     method: "DELETE",
     headers: { ...getAuthHeader() },
   });
