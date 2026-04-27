@@ -107,6 +107,7 @@ jobs:
       - name: Build React
         env:
           CI: false
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
         run: |
           cd react/docu_tag  # 폴더명 맞게 수정
           npm install
