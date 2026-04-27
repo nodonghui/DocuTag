@@ -121,7 +121,7 @@ jobs:
               "mkdir -p ~/app/frontend"
           
           scp -i ~/.ssh/lightsail.pem -r \
-              react/docu_tag/build/ \  
+              react/docu_tag/build/ \
               ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:~/app/frontend/
 
       # 11. react 리로드
