@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./styles/login.css";
 const REACT_APP_API_BASE_URL=`http://localhost:8080`
-const BACKEND_LOGIN_URL = REACT_APP_API_BASE_URL+`/auth/kakao/login`;
+const BACKEND_LOGIN_URL = REACT_APP_API_BASE_URL+`/api/auth/kakao/login`;
 
 export default function LoginPage() {
   const [hovered, setHovered] = useState(false);

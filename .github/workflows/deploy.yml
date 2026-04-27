@@ -98,7 +98,37 @@ jobs:
             echo "배포 완료"
           EOF
 
-      # 9. SSH 키 정리
+      # 9. React 빌드 (Java 빌드 이후에 추가)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build React
+        run: |
+          cd react/docu_tag  # 폴더명 맞게 수정
+          npm install
+          npm run build
+
+      # 10. React 빌드 파일 전송
+      - name: Copy React build to Lightsail
+        run: |
+          ssh -i ~/.ssh/lightsail.pem \
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} \
+              "mkdir -p ~/app/frontend"
+          
+          scp -i ~/.ssh/lightsail.pem -r \
+              react/docu_tag/build/ \  
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:~/app/frontend/
+
+      # 11. react 리로드
+      - name: Reload nginx
+        run: |
+          ssh -i ~/.ssh/lightsail.pem \
+              ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} \
+              "sudo systemctl reload nginx"
+
+      # 12. SSH 키 정리
       - name: Cleanup SSH key
         if: always()
         run: rm -f ~/.ssh/lightsail.pem
