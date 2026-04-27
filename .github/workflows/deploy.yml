@@ -47,6 +47,7 @@ jobs:
           kakao.redirect-uri=${{ secrets.KAKAO_CLIENT_URL}}
 
           jwt.secret=${{ secrets.JWT_SECRET }}
+          frontend.base-url=${{ secrets.FRONTEND_BASE_URL }}
           EOF
 
       # 4. 빌드

@@ -5,6 +5,7 @@ import docuTag.global.exception.KakaoApiException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,9 @@ public class KakaoAuthController {
 
     private final KakaoAuthService kakaoAuthService;
 
+    @Value("${frontend.base-url}")  // ← 추가
+    private String frontendBaseUrl;
+
     // 1단계: 카카오 로그인 페이지로 리다이렉트
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
@@ -30,7 +34,7 @@ public class KakaoAuthController {
             response.sendRedirect(url);
         } catch (Exception e) {
             // 에러 발생 시 프론트 로그인 페이지로 에러코드와 함께 리다이렉트
-            response.sendRedirect("http://localhost:3000/error?error=" + e.getMessage());
+            response.sendRedirect(frontendBaseUrl + "/error?error=" + e.getMessage());
         }
     }
 
@@ -41,13 +45,13 @@ public class KakaoAuthController {
             String accessToken = kakaoAuthService.getAccessToken(code);
             KakaoAuthService.KakaoUserInfo info = kakaoAuthService.getKakaoUserInfo(accessToken);
             String serviceToken = kakaoAuthService.loginOrRegister(info);
-            response.sendRedirect("http://localhost:3000/?token=" + serviceToken);
+            response.sendRedirect(frontendBaseUrl + "/?token=" + serviceToken);
         } catch (KakaoApiException e) {
             log.error("카카오 콜백 처리 실패 - kakaoCode: {}", e.getKakaoCode());
-            response.sendRedirect("http://localhost:3000/error?error=" + e.getKakaoCode());
+            response.sendRedirect(frontendBaseUrl + "/error?error=" + e.getKakaoCode());
         } catch (Exception e) {
             log.error("카카오 콜백 처리 실패: {}", e.getMessage());
-            response.sendRedirect("http://localhost:3000/error?error=UNKNOWN");
+            response.sendRedirect(frontendBaseUrl + "/error?error=UNKNOWN");
         }
     }
 }
