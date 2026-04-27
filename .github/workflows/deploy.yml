@@ -133,7 +133,7 @@ jobs:
               ${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }} \
               "sudo systemctl reload nginx"
 
-      # 12. SSH 키 정리
+      # 13. SSH 키 정리
       - name: Cleanup SSH key
         if: always()
         run: rm -f ~/.ssh/lightsail.pem
