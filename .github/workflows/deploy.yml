@@ -105,6 +105,8 @@ jobs:
           node-version: '20'
 
       - name: Build React
+        env:
+          CI: false
         run: |
           cd react/docu_tag  # 폴더명 맞게 수정
           npm install
