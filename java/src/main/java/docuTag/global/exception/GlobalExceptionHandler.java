@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.of(500, e));
+                .body(ErrorResponse.of(500, e.getMessage()));
     }
 
     @ExceptionHandler(GeminiApiException.class)
