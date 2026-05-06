@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.of(500, "서버 내부 오류가 발생했습니다"));
+                .body(ErrorResponse.of(500, e));
     }
 
     @ExceptionHandler(GeminiApiException.class)
