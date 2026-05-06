@@ -67,6 +67,8 @@ jobs:
           spring.security.oauth2.client.registration.google.scope=email,profile
           
           server.forward-headers-strategy=framework
+          spring.session.store-type=redis
+          spring.session.redis.flush-mode=on-save
           
           logging.level.org.springframework.security: DEBUG
           logging.level.org.springframework.security.oauth2: TRACE
