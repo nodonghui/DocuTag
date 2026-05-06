@@ -387,3 +387,31 @@
   color: #555;
   cursor: text;
 }
+
+.auth-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-status__name {
+  color: #e8e6e1;
+  font-size: 14px;
+}
+
+.auth-status__button {
+  background: transparent;
+  border: 1px solid #2a2a2f;
+  color: #e8e6e1;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.auth-status__button:hover {
+  border-color: #555;
+  color: #fff;
+}

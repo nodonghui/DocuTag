@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +23,8 @@ public class DataInitializer implements ApplicationRunner {
 
     private final DocumentRepository documentRepository;
     private final TagRepository tagRepository;
-    private final UserRepository userRepository;
+    private final UserRepository userRepository;         // 추가
+    private final PasswordEncoder passwordEncoder;       // 추가
 
 
     public void run(ApplicationArguments args) {
@@ -31,6 +33,16 @@ public class DataInitializer implements ApplicationRunner {
             log.info("[DataInitializer] 이미 데이터가 존재합니다. 초기화를 건너뜁니다.");
             return;
         }
+
+        User testUser = userRepository.save(User.builder()
+                .oauthProvider("local")
+                .providerId(null)
+                .email("rdh1111@naver.com")
+                .password(passwordEncoder.encode("aa1234"))
+                .nickname("테스트유저")
+                .build());
+
+        log.info("[DataInitializer] 테스트 유저 생성 완료 - email: {}, password: test1234", testUser.getEmail());
 
         log.info("[DataInitializer] 테스트 데이터 삽입 시작...");
 
@@ -97,7 +109,7 @@ public class DataInitializer implements ApplicationRunner {
 
         for (DocSeed seed : seeds) {
             Document doc = Document.builder()
-                    .user(null)   // ← 유저 세팅
+                    .user(testUser)   // ← 유저 세팅
                     .title(seed.title())
                     .content(seed.content())
                     .build();

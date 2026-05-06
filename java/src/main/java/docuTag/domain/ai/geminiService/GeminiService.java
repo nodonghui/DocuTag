@@ -6,6 +6,7 @@ import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
 import docuTag.domain.ai.SummaryMode;
+import docuTag.global.exception.GeminiApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,14 +48,15 @@ public class GeminiService {
 
             } catch (Exception e) {
                 if (!handleException(e, i, maxRetry)) {
-                    return "default"; // 재시도 불필요한 예외 → 즉시 종료
+                    throw new GeminiApiException("Gemini API 키 또는 요청 오류", 502);
                 }
                 // handleException이 true → 재시도 대기
             }
         }
 
         log.error("Gemini API 최대 재시도 초과");
-        return "default";
+        throw new GeminiApiException("Gemini API 호출에 실패했습니다", 502);
+
     }
 
     /**

@@ -22,11 +22,14 @@ public class User {
     @Column(name = "oauth_provider", nullable = false, length = 20)
     private String oauthProvider;
 
-    @Column(name = "kakao_id", nullable = false, length = 100)
-    private Long kakaoId;
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
 
-    @Column(name = "email", length = 100)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
+
+    @Column(name = "password", length = 200)
+    private String password;      // 일반 로그인용 추가, OAuth 유저는 null
 
     @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;

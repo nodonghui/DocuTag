@@ -3,29 +3,40 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./LoginPage";
 import DocuTag from "./DocuTag";
 import ErrorPage from "./ErrorPage";
+import SignupPage from "./SignupPage";
 import { useEffect, useState } from "react";
 
+import { checkAuthStatus } from "./api/JwtApi";
+
 export default function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(undefined); // undefined = 로딩중, null = 비로그인\
+
+   console.log(LoginPage);
+   console.log(DocuTag);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) { setIsLoggedIn(true); return; }
-
-        const params = new URLSearchParams(window.location.search);
-        const newToken = params.get("token");
-        if (newToken) {
-            localStorage.setItem("token", newToken);
-            setIsLoggedIn(true);
-            window.history.replaceState({}, "", "/");
-        }
+        checkAuthStatus()
+            .then(data => setUser(data))   // { nickname: "..." } or null
+            .catch(() => setUser(null));
     }, []);
+
+    
+
+    if (user === undefined) return null; // 로딩 중
 
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/error"  element={<ErrorPage />} />
-                <Route path="/"       element={isLoggedIn ? <DocuTag /> : <LoginPage />} />
+                <Route path="/error" element={<ErrorPage />} />
+                <Route
+                    path="/"
+                    element={
+                        user
+                            ? <DocuTag user={user} onLogout={() => setUser(null)} />
+                            : <LoginPage />
+                    }
+                />
+                <Route path="/signup" element={<SignupPage />} />
             </Routes>
         </BrowserRouter>
     );

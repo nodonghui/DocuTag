@@ -1,23 +1,15 @@
-package docuTag.domain.kakao.controller;
+package docuTag.domain.jwt.oauth.kakao.controller;
 
-import docuTag.domain.kakao.service.KakaoAuthService;
-import docuTag.global.exception.KakaoApiException;
-import jakarta.servlet.http.HttpServletResponse;
+import docuTag.domain.jwt.oauth.kakao.service.KakaoAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("api/auth/kakao")
+//@RequestMapping("api/auth/kakao")
+// 해당 로직 사용시 url 매핑 /api/auth/kakao 로 맞춰야함
 @RequiredArgsConstructor
 public class KakaoAuthController {
 
@@ -26,7 +18,11 @@ public class KakaoAuthController {
     @Value("${frontend.base-url}")  // ← 추가
     private String frontendBaseUrl;
 
+
+
+    /*
     // 1단계: 카카오 로그인 페이지로 리다이렉트
+    // 해당 과정은 customAuthorization 으로 진행
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
         try {
@@ -38,6 +34,9 @@ public class KakaoAuthController {
         }
     }
 
+     */
+
+    /*
     // 2단계: 카카오가 인가 코드를 여기로 보내줌
     @GetMapping("/callback")
     public void callback(@RequestParam String code, HttpServletResponse response) throws IOException {
@@ -54,4 +53,9 @@ public class KakaoAuthController {
             response.sendRedirect(frontendBaseUrl + "/error?error=UNKNOWN");
         }
     }
+
+     */
+
+
+
 }

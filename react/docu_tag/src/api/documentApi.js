@@ -1,17 +1,10 @@
+import { fetchWithAuth } from "./JwtApi";
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
 
 export async function createDocument({ title, content, tags }) {
-  const response = await fetch(`${BASE_URL}/api/documents`, {
+  const response = await fetchWithAuth(`${BASE_URL}/api/documents`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
     body: JSON.stringify({ title, content, tags }),
   });
 
@@ -19,9 +12,8 @@ export async function createDocument({ title, content, tags }) {
 }
 
 export const fetchDocumentById = async (id) => {
-  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
-    headers: { ...getAuthHeader() },
-  });
+  const response = await fetchWithAuth(`${BASE_URL}/api/documents/${id}`);
+
   console.log("상태코드 : " + response.status);
   if (!response.ok) throw new Error("문서 조회 실패");
   return response.json();
@@ -35,30 +27,26 @@ export async function fetchDocuments({ tags, title, lastId, size }) {
   if (lastId != null) params.append("lastId", lastId);
   params.append("size", size ?? 10);
 
-  const response = await fetch(`${BASE_URL}/api/documents?${params}`, {
-    headers: { ...getAuthHeader() },
-  });
+  const response = await fetchWithAuth(`${BASE_URL}/api/documents?${params}`);
+
   if (!response.ok) throw new Error(`문서 조회 실패: ${response.status}`);
   return response.json();
 }
 
 export const updateDocument = async ({ id, title, content, tags }) => {
-  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
+  const response = await fetchWithAuth(`${BASE_URL}/api/documents/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
     body: JSON.stringify({ title, content, tags }),
   });
+
   if (!response.ok) throw new Error("문서 수정 실패");
 };
 
 export const deleteDocument = async (id) => {
   console.log("delete id : " + id);
-  const response = await fetch(`${BASE_URL}/api/documents/${id}`, {
+  const response = await fetchWithAuth(`${BASE_URL}/api/documents/${id}`, {
     method: "DELETE",
-    headers: { ...getAuthHeader() },
   });
+
   if (!response.ok) throw new Error("문서 삭제 실패");
 };

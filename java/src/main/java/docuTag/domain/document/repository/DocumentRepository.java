@@ -74,15 +74,12 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     @Query("""
     SELECT d FROM Document d
+    JOIN FETCH d.user
     LEFT JOIN FETCH d.documentTags dt
     LEFT JOIN FETCH dt.tag
     WHERE d.documentId = :id
-        AND d.user.userId = :userId
     """)
-    Optional<Document> findByIdWithTags(
-            @Param("id") Long id,
-            @Param("userId") Long userId
-    );
+    Optional<Document> findByIdWithTags(@Param("id") Long id);
 
     @Query("""
     SELECT d FROM Document d

@@ -1,22 +1,11 @@
-package docuTag.domain.kakao.service;
+package docuTag.domain.jwt.oauth.kakao.service;
 
-import docuTag.domain.kakao.dto.KakaoUserResponseDto;
-import docuTag.domain.user.entity.User;
-import docuTag.domain.user.repository.UserRepository;
 import docuTag.global.exception.KakaoApiException;
-import docuTag.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
@@ -25,7 +14,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class KakaoAuthService {
-
+    /*
     @Value("${kakao.client-id}")
     private String clientId;
 
@@ -34,6 +23,8 @@ public class KakaoAuthService {
 
     @Value("${kakao.redirect-uri}")
     private String redirectUri;
+
+
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final UserRepository userRepository;
@@ -111,7 +102,7 @@ public class KakaoAuthService {
     @Transactional
     public String loginOrRegister(KakaoUserInfo info) {
         User user = findOrCreateUser(info);
-        return jwtUtil.createToken(user.getUserId());
+        return jwtUtil.createAccessToken(user.getUserId());
     }
 
     private User findOrCreateUser(KakaoUserInfo info) {
@@ -137,6 +128,8 @@ public class KakaoAuthService {
                     ));
         }
     }
+
+     */
 
     private void handleKakaoError(HttpClientErrorException e, String context) {
         int httpStatus = e.getStatusCode().value();

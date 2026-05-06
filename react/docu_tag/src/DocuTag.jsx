@@ -4,11 +4,12 @@ import "./styles/DocuTag.css";
 import Navbar from "./components/Navbar";
 import TagBar from "./components/TagBar";
 import DocumentGrid from "./components/DocumentGrid";
+import AuthStatus from "./components/AuthStatus";
 import WriteModal from "./components/WriteModal";
 import DetailModal from "./components/DetailModal";
 import { fetchDocuments, fetchDocumentById } from "./api/documentApi";
 
-export default function DocuTag() {
+export default function DocuTag({ user, onLogout }) {
   const [search, setSearch] = useState("");
   const [searchTags, setSearchTags] = useState([]);
   const [showWrite, setShowWrite] = useState(false);
@@ -153,13 +154,24 @@ export default function DocuTag() {
 
   return (
     <div style={{ fontFamily: "'Noto Sans KR', sans-serif", minHeight: "100vh", background: "#0f0f11", color: "#e8e6e1" }}>
-      <Navbar
-        search={search}
-        onSearchChange={setSearch}
-        onWriteClick={() => setShowWrite(true)}
-        onSearch={handleSearch}
-      />
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ flex: 1 }}>
+          <Navbar
+            search={search}
+            onSearchChange={setSearch}
+            onWriteClick={() => setShowWrite(true)}
+            onSearch={handleSearch}
+          />
+        </div>
+        <div style={{ paddingRight: "16px", flexShrink: 0 }}>
+          <AuthStatus user={user} onLogout={onLogout} />
+        </div>
+      </div>
+      
       <TagBar tags={searchTags} onRemove={handleRemoveTag} onAdd={handleAddTag} />
+
+      
+      
 
       <main className="main">
         <div className="result-info">

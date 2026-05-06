@@ -12,6 +12,7 @@ import docuTag.domain.tag.service.TagService;
 import docuTag.domain.user.entity.User;
 
 import docuTag.domain.user.repository.UserRepository;
+import docuTag.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -71,8 +72,15 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public DocumentDto getDocument(Long id, Long userId) {
-        Document document = documentRepository.findByIdWithTags(id, userId)
-                .orElseThrow(() -> new NoSuchElementException("Document not found: " + id));
+        // 1. 문서 존재 여부 확인 (userId 없이 조회)
+        Document document = documentRepository.findByIdWithTags(id)
+                .orElseThrow(() -> new ServiceException(404, "Document not found: " + id));
+
+        Long documentUserId = document.getUser().getUserId();
+        if(!userId.equals(documentUserId)) {
+            throw new ServiceException(403, "Document access denied: " + id);
+        }
+
         return DocumentDto.from(document);
     }
 
@@ -96,8 +104,16 @@ public class DocumentService {
 
     @Transactional
     public void updateDocument(Long id, DocumentUpdateRequest request, Long userId) {
-        Document document = documentRepository.findByIdWithTags(id, userId)
-                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다. id: " + id));
+
+        // 1. 문서 존재 여부 확인 (userId 없이 조회)
+        Document document = documentRepository.findByIdWithTags(id)
+                .orElseThrow(() -> new ServiceException(404, "Document not found: " + id));
+
+        Long documentUserId = document.getUser().getUserId();
+        if(!userId.equals(documentUserId)) {
+            throw new ServiceException(403, "Document access denied: " + id);
+        }
+
 
         document.updateDocument(request.getTitle(), request.getContent());
 
@@ -125,8 +141,14 @@ public class DocumentService {
 
     @Transactional
     public void deleteDocument(Long id, Long userId) {
-        Document document = documentRepository.findByIdWithTags(id, userId)
-                .orElseThrow(() -> new RuntimeException("문서를 찾을 수 없습니다. id: " + id));
+        // 1. 문서 존재 여부 확인 (userId 없이 조회)
+        Document document = documentRepository.findByIdWithTags(id)
+                .orElseThrow(() -> new ServiceException(404, "Document not found: " + id));
+
+        Long documentUserId = document.getUser().getUserId();
+        if(!userId.equals(documentUserId)) {
+            throw new ServiceException(403, "Document access denied: " + id);
+        }
         documentRepository.delete(document);
     }
 }

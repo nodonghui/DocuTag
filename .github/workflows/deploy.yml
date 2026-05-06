@@ -42,12 +42,42 @@ jobs:
 
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
 
-          kakao.client-id=${{ secrets.KAKAO_CLIENT_ID }}
-          kakao.client-secret=${{ secrets.KAKAO_CLIENT_SECRET }}
-          kakao.redirect-uri=${{ secrets.KAKAO_CLIENT_URL}}
-
           jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.access-expiration=3600000
+          jwt.refresh-expiration=604800000
+
           frontend.base-url=${{ secrets.FRONTEND_BASE_URL }}
+
+          spring.security.oauth2.client.registration.kakao.client-id=${{ secrets.KAKAO_CLIENT_ID }}
+          spring.security.oauth2.client.registration.kakao.client-secret=${{ secrets.KAKAO_CLIENT_SECRET }}
+          spring.security.oauth2.client.registration.kakao.client-name=Kakao
+          spring.security.oauth2.client.registration.kakao.authorization-grant-type=authorization_code
+          spring.security.oauth2.client.registration.kakao.redirect-uri=${{ secrets.KAKAO_CLIENT_URL }}
+          spring.security.oauth2.client.registration.kakao.scope=profile_nickname,account_email
+          spring.security.oauth2.client.registration.kakao.client-authentication-method=client_secret_post
+
+          spring.security.oauth2.client.provider.kakao.authorization-uri=https://kauth.kakao.com/oauth/authorize
+          spring.security.oauth2.client.provider.kakao.token-uri=https://kauth.kakao.com/oauth/token
+          spring.security.oauth2.client.provider.kakao.user-info-uri=https://kapi.kakao.com/v2/user/me
+          spring.security.oauth2.client.provider.kakao.user-name-attribute=id
+
+          spring.security.oauth2.client.registration.google.client-id=${{ secrets.GOOGLE_CLIENT_ID }}
+          spring.security.oauth2.client.registration.google.client-secret=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.FRONTEND_BASE_URL }}/login/oauth2/code/google
+          spring.security.oauth2.client.registration.google.scope=email,profile
+
+          spring.data.redis.host=localhost
+          spring.data.redis.port=6379
+          spring.data.redis.password=${{ secrets.REDIS_PASSWORD }}
+          spring.data.redis.timeout=2000ms
+
+          springdoc.api-docs.path=/api-docs
+          springdoc.swagger-ui.path=/swagger-ui.html
+          springdoc.swagger-ui.tags-sorter=alpha
+          springdoc.swagger-ui.operations-sorter=alpha
+          springdoc.packages-to-scan=docuTag.domain.document.controller,docuTag.domain.ai.controller,docuTag.domain.user.controller,docuTag.domain.jwt.controller
+          springdoc.swagger-ui.enabled=false
+          springdoc.api-docs.enabled=false
           EOF
 
       # 4. 빌드
