@@ -70,6 +70,11 @@ jobs:
           logging.level.org.springframework.security: DEBUG
           logging.level.org.springframework.security.oauth2: TRACE
 
+          spring.data.redis.host=localhost
+          spring.data.redis.port=6379
+          spring.data.redis.password=${{ secrets.REDIS_PASSWORD }}
+          spring.data.redis.timeout=2000ms
+
           springdoc.api-docs.path=/api-docs
           springdoc.swagger-ui.path=/swagger-ui.html
           springdoc.swagger-ui.tags-sorter=alpha
