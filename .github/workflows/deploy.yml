@@ -66,6 +66,7 @@ jobs:
           spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.GOOGLE_CLIENT_URL }}
           spring.security.oauth2.client.registration.google.scope=email,profile
           
+          server.forward-headers-strategy=framework
           
           logging.level.org.springframework.security: DEBUG
           logging.level.org.springframework.security.oauth2: TRACE
