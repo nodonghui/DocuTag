@@ -28,43 +28,43 @@ public class OAuth2DebugFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        // 1단계: authorization 요청
+        // Step 1: Authorization request
         if (uri.contains("/oauth2/authorization")) {
-            log.warn("=== [OAUTH2 1단계] Authorization 요청 ===");
+            log.warn("=== [OAUTH2 STEP 1] Authorization Request ===");
             log.warn("URI: {}", uri);
             log.warn("SessionID: {}", request.getSession().getId());
         }
 
-        // 2단계: 콜백 요청
+        // Step 2: Callback request
         if (uri.contains("/login/oauth2/code")) {
-            log.warn("=== [OAUTH2 2단계] Callback 요청 ===");
+            log.warn("=== [OAUTH2 STEP 2] Callback Request ===");
             log.warn("URI: {}", uri);
-            log.warn("URL state 파라미터: {}", request.getParameter("state"));
-            log.warn("URL code 파라미터: {}", request.getParameter("code") != null ? "있음" : "없음");
+            log.warn("URL state param: {}", request.getParameter("state"));
+            log.warn("URL code param: {}", request.getParameter("code") != null ? "exists" : "missing");
             log.warn("SessionID: {}", request.getSession(false) != null
-                    ? request.getSession(false).getId() : "세션없음");
+                    ? request.getSession(false).getId() : "NO SESSION");
 
-            // 세션에서 저장된 authorizationRequest 확인
+            // Check saved authorizationRequest from session
             HttpSession session = request.getSession(false);
             if (session != null) {
                 Object savedRequest = session.getAttribute(
                         "org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository.AUTHORIZATION_REQUEST"
                 );
-                log.warn("세션에 저장된 AuthorizationRequest: {}",
-                        savedRequest != null ? savedRequest.toString() : "없음 ❌");
+                log.warn("Saved AuthorizationRequest in session: {}",
+                        savedRequest != null ? savedRequest.toString() : "NOT FOUND ❌");
             } else {
-                log.warn("세션 자체가 없음 ❌");
+                log.warn("Session does not exist ❌");
             }
 
-            // 쿠키 전체 출력
+            // Print all cookies
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    log.warn("쿠키: {}={}", cookie.getName(),
+                    log.warn("Cookie: {}={}", cookie.getName(),
                             cookie.getName().contains("oauth2") ? cookie.getValue() : "***");
                 }
             } else {
-                log.warn("쿠키 없음 ❌");
+                log.warn("No cookies ❌");
             }
         }
 
