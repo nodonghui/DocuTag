@@ -73,7 +73,6 @@ dependencies {
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 
-	implementation 'org.springframework.session:spring-session-data-redis'
 }
 
 tasks.named('test') {

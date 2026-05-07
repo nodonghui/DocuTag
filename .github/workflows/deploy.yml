@@ -66,12 +66,6 @@ jobs:
           spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.FRONTEND_BASE_URL }}/login/oauth2/code/google
           spring.security.oauth2.client.registration.google.scope=email,profile
           
-          server.forward-headers-strategy=framework
-          spring.session.store-type=redis
-          spring.session.redis.flush-mode=on-save
-          server.servlet.session.cookie.same-site=lax
-          server.servlet.session.cookie.http-only=true
-          server.servlet.session.cookie.secure=false
           
           logging.level.org.springframework.security: DEBUG
           logging.level.org.springframework.security.oauth2: TRACE
