@@ -54,7 +54,9 @@ public class SecurityConfig {
                                 "/api/user/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/api/log/**",
+                                "/api/stats/**"
                         ).permitAll()
                         // 관리자만
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")

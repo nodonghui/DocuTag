@@ -36,6 +36,7 @@ dependencies {
 	// 5. Spring Boot Test: 'test' 스타터 하나만 있으면 됩니다.
 	// 이 스타터가 JUnit, Mockito 등 모든 테스트 관련 라이브러리를 가져옵니다.
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 
 	//
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -72,6 +73,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+
+	implementation 'org.springframework.kafka:spring-kafka'
 
 }
 

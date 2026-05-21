@@ -70,7 +70,7 @@ export default function WriteModal({ onClose, onSubmit }) {
     setSubmitting(true);
     try {
       await createDocument({ title, content, tags });
-      onSubmit({ title, content, tags });
+      onSubmit();
       setTitle("");
       setContent("");
       setTags([]);

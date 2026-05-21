@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag\\\\java\" -Recurse | Where-Object { $_.Extension -eq \".java\" } | ForEach-Object { $_.FullName })"
+    ]
+  }
+}

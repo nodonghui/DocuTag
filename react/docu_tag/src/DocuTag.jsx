@@ -147,8 +147,14 @@ export default function DocuTag({ user, onLogout }) {
     setSearchTags((prev) => prev.filter((t) => t !== tag));
   };
 
-  const handleWrite = ({ title, tags }) => {
-    setDocs((prev) => [{ id: Date.now(), title, tags }, ...prev]);
+  const handleWrite = async () => {
+    await loadDocuments({
+      tags: searchRef.current.tags,
+      title: searchRef.current.title,
+      lastId: null,
+      size: pageState.size,
+      reset: true,
+    });
     setShowWrite(false);
   };
 
