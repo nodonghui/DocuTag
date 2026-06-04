@@ -1,0 +1,64 @@
+[33m05185178[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m data insert script and sql 최적화
+[33m6c960233[m sql 최적화
+[33ma134b824[m[33m ([m[1;31morigin/main[m[33m)[m claude code apply
+[33m12c74f63[m hard
+[33m3a468524[m hard coding update
+[33mc27471b7[m deploy update
+[33m19d1d78c[m deploy update
+[33m0121fb4e[m s config
+[33mb0951ed6[m security config update
+[33md6e14289[m security config update
+[33mf9a3bf80[m deploy update
+[33m6d4f1a84[m deploy update
+[33maae39e7d[m debug
+[33m2086c6c6[m debuging filter
+[33mdaab70e5[m deploy update
+[33mc5cd160e[m deploy update
+[33mfb0597b9[m deploy update
+[33mcb432056[m oauth session to redis
+[33ma69904b1[m build error update
+[33m4ccc9ef6[m update deploy
+[33m858364aa[m deploy update
+[33m2aaf9279[m modify
+[33m72cc076b[m 서버 내부 오류 디버깅 위해 임시 500 번 에러 반환 수정
+[33m0628817d[m deploy update
+[33m609fe5b5[m fect: jwt add
+[33m66800bf3[m deploy update
+[33ma331ae94[m java front-end-url static to dy
+[33m8f76551d[m deploy update
+[33m3c689d42[m deploy update and front url
+[33m21c1987f[m deploy update
+[33m0dafe456[m deploy update
+[33m7fc8171f[m deploy update
+[33mda57308e[m react 배포
+[33md156fac3[m deploy update
+[33m976de5f9[m deploy
+[33m5eb4a9c2[m deploy
+[33mee2bf9ce[m deploy update
+[33ma3861d75[m gradle wrapper upload
+[33mf789fae2[m fix gitignore cache
+[33mf4d027e7[m Fix gitignore for ci/cd
+[33maff0556d[m deploy update
+[33m82cfbb55[m deploy commit
+[33m09285a43[m deploy update
+[33m582352bc[m add deploy.yml
+[33m26fab935[m Merge branch 'main' of https://github.com/nodonghui/DocuTag
+[33mf9666c7e[m index add
+[33m314677a1[m Update README.md
+[33m840de583[m Update README.md
+[33m4ec08ff6[m fuction finish
+[33m17b1d53c[m api leak clear
+[33m3f10b4d5[m kakao auth add
+[33meeb8bab9[m CRUD 기능 구현
+[33mf62cbd92[m 리액트 코드 구조 세팅
+[33mc5449fae[m merge: unrelated histories 병합
+[33m498e1f65[m 기본 세팅 과 조회 생성 api 구현
+[33m246883eb[m Update README.md
+[33m09a77289[m Update README.md
+[33mc6521155[m Update README.md
+[33mfdfcdeec[m Update README.md
+[33m6766464b[m Update README.md
+[33m65f34efc[m Update README.md
+[33mbadb5637[m Create README.md
+[33m67c6f5e8[m init commit
+[33m9c7865aa[m Initial commit

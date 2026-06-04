@@ -1,9 +1,6 @@
 package docuTag.domain.document.service;
 
-import docuTag.domain.document.dto.DocumentCreateRequest;
-import docuTag.domain.document.dto.DocumentDto;
-import docuTag.domain.document.dto.DocumentSearchResponse;
-import docuTag.domain.document.dto.DocumentUpdateRequest;
+import docuTag.domain.document.dto.*;
 import docuTag.domain.document.entity.Document;
 import docuTag.domain.document.entity.DocumentTag;
 import docuTag.domain.document.repository.DocumentRepository;
@@ -19,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,14 +59,117 @@ public class DocumentService {
     }
 
 
+    @Transactional(readOnly = true)
+    public DocumentSearchResponse2 getDocuments2(List<String> tags, String title, Long lastId, int size, Long userId) {
+
+        List<Long> ids = tags.isEmpty()
+                ? documentRepository.findDocumentIdsWithPaging(userId, title, lastId, size + 1)
+                : documentRepository.findDocumentIdsByTagNamesPaging(userId, lastId, title, tags, size);
+
+        if (ids.isEmpty()) {
+            return DocumentSearchResponse2.of(List.of(), 0L, false);
+        }
+
+        boolean hasNext = ids.size() == size + 1;
+
+        if (hasNext) {
+            ids = new ArrayList<>(ids.subList(0, size));
+        }
+
+        List<Document> documents = documentRepository.findAllWithTags(ids);
+
+        List<DocumentWithTagsDto> dtos = documents.stream()
+                .map(doc -> {
+                    DocumentWithTagsDto dto = new DocumentWithTagsDto(
+                            doc.getDocumentId(),
+                            doc.getUser().getUserId(),
+                            doc.getTitle(),
+                            doc.getContent(),
+                            doc.getCreatedAt(),
+                            doc.getUpdatedAt()
+                    );
+                    doc.getDocumentTags().forEach(dt ->
+                            dto.addTagName(dt.getTag().getTagName())
+                    );
+                    return dto;
+                })
+                .toList();
+
+        long nextLastId = documents.getLast().getDocumentId();
+
+        return DocumentSearchResponse2.of(dtos, nextLastId, hasNext);
+    }
+
+
+
+
     private List<Document> fetchDocuments(List<String> tagNames, String title, Long lastId, int pageSize, Long userId) {
         if (tagNames.isEmpty()) {
             return documentRepository.findDocumentsWithPaging(userId, title, lastId, pageSize);
         }
-        if (tagNames.size() == 1) {
-            return documentRepository.findDocumentsByTagWithPaging(userId, tagNames.getFirst(), title, lastId, pageSize);
-        }
+
         return documentRepository.findDocumentsByTagsWithPaging(userId, tagNames, title, lastId, pageSize);
+    }
+
+    public List<DocumentWithTagsDto> getFilteredDocumentsWithTags(
+            Long         userId,
+            Long         lastId,
+            String       title,
+            List<String> tagNames,
+            int          pageSize
+    ) {
+        List<Object[]> rows = documentRepository.findFilteredWithTags(
+                userId, lastId, title, tagNames, pageSize
+        );
+
+        Map<Long, DocumentWithTagsDto> dtoMap = new LinkedHashMap<>();
+
+        for (Object[] row : rows) {
+            Long documentId = ((Number) row[0]).longValue();
+
+            dtoMap.computeIfAbsent(documentId, id -> new DocumentWithTagsDto(
+                    id,
+                    ((Number)    row[1]).longValue(),           // user_id
+                    (String)     row[2],                        // title
+                    (String)     row[3],                        // content
+                    toLocalDateTime(row[4]),                    // created_at
+                    toLocalDateTime(row[5])                     // updated_at
+            ));
+
+            dtoMap.get(documentId).addTagName((String) row[6]); // tag_name
+        }
+
+        return new ArrayList<>(dtoMap.values());
+    }
+
+    public List<DocumentWithTagsDto> getFilteredDocumentsWithRawTags(
+            Long         userId,
+            Long         lastId,
+            String       title,
+            List<String> tagNames,
+            int          pageSize
+    ) {
+        List<Object[]> rows = documentRepository.findFilteredWithTagsGrouped(
+                userId, lastId, title, tagNames, pageSize
+        );
+
+        return rows.stream()
+                .map(row -> new DocumentWithTagsDto(
+                        ((Number)    row[0]).longValue(),   // document_id
+                        ((Number)    row[1]).longValue(),   // user_id
+                        (String)     row[2],                // title
+                        (String)     row[3],                // content
+                        toLocalDateTime(row[4]),            // created_at
+                        toLocalDateTime(row[5]),            // updated_at
+                        (String)     row[6]                 // tag_names (GROUP_CONCAT 결과)
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private LocalDateTime toLocalDateTime(Object value) {
+        if (value instanceof Timestamp ts) return ts.toLocalDateTime();
+        if (value instanceof LocalDateTime ldt) return ldt;
+        return null;
     }
 
     @Transactional(readOnly = true)

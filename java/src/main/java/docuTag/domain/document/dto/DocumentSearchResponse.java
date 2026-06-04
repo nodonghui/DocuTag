@@ -24,4 +24,5 @@ public class DocumentSearchResponse {
     public static DocumentSearchResponse of(List<DocumentDto> documents, long lastId, boolean hasNext) {
         return new DocumentSearchResponse(documents, lastId, hasNext);
     }
+
 }

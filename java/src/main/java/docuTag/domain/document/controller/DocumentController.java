@@ -1,9 +1,6 @@
 package docuTag.domain.document.controller;
 
-import docuTag.domain.document.dto.DocumentCreateRequest;
-import docuTag.domain.document.dto.DocumentDto;
-import docuTag.domain.document.dto.DocumentSearchResponse;
-import docuTag.domain.document.dto.DocumentUpdateRequest;
+import docuTag.domain.document.dto.*;
 import docuTag.domain.document.service.DocumentService;
 import docuTag.domain.jwt.SecurityUser;
 import docuTag.global.exception.ErrorResponse;
@@ -79,7 +76,7 @@ public class DocumentController {
                             )
                     ))
     })
-    public ResponseEntity<DocumentSearchResponse> getDocuments(
+    public ResponseEntity<DocumentSearchResponse2> getDocuments(
             @Parameter(description = "태그 목록 (복수 가능)") @RequestParam(required = false) List<String> tags,
             @Parameter(description = "제목 검색어") @RequestParam(required = false) String title,
             @Parameter(description = "커서 ID (이전 페이지 마지막 ID)") @RequestParam(required = false) Long lastId,
@@ -88,7 +85,7 @@ public class DocumentController {
     ) {
         if (tags == null) tags = List.of();
         Long userId = securityUser.getUserId();
-        return ResponseEntity.ok(documentService.getDocuments(tags, title, lastId, size, userId));
+        return ResponseEntity.ok(documentService.getDocuments2(tags, title, lastId, size, userId));
     }
 
     // 단건 조회

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+/*
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -123,4 +123,8 @@ public class DataInitializer implements ApplicationRunner {
 
 
     }
+
+
 }
+
+*/
