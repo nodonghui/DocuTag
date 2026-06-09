@@ -1,0 +1,7 @@
+{
+  "tool_name": "PowerShell",
+  "tool_input_preview": "{\"command\":\"Set-Location C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag\\\\java; .\\\\gradlew.bat test --tests \\\"docuTag.domain.document.service.DocumentServiceTest.getDocuments_singleTag_success\\\" 2>&1 | Select-Stri...",
+  "error": "Exit code 1\nDocumentServiceTest > 단일 태그로 문서 목록 조회 - 성공 FAILED\r\n    java.lang.AssertionError at DocumentServiceTest.java:107\r\n1 test completed, 1 failed\r\n> Task :test FAILED\r\nFAILURE: Build failed with an exception.\r\nExecution failed for task ':test'.\r\nBUILD FAILED in 9s",
+  "timestamp": "2026-06-05T12:36:48.330Z",
+  "retry_count": 2
+}

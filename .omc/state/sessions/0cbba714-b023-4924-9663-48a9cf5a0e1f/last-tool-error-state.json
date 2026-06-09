@@ -1,0 +1,7 @@
+{
+  "tool_name": "PowerShell",
+  "tool_input_preview": "{\"command\":\"cd C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag; .\\\\gradlew test --tests \\\"docuTag.domain.document.service.DocumentServiceTest\\\" --tests \\\"docuTag.domain.document.dto.DocumentWithTagsDtoTest\\\" --inf...",
+  "error": "Exit code 1\n.\\gradlew : The term '.\\gradlew' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the sp\r\nelling of the name, or if a path was included, verify that the path is correct and try again.\r\nAt line:1 char:36\r\n+ cd C:\\Users\\rdh04\\Project\\docuTag; .\\gradlew test --tests \"docuTag.do ...\r\n+                                    ~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (.\\gradlew:String) [], CommandNotFoundException\r\n    + FullyQualified...",
+  "timestamp": "2026-06-05T12:32:43.448Z",
+  "retry_count": 1
+}

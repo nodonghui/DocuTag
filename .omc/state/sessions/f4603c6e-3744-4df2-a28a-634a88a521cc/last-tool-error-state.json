@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git mv java/111.txt java/222.txt\",\"description\":\"Rename java/111.txt to java/222.txt using git mv\"}",
+  "error": "Exit code 128\nfatal: not under version control, source=java/111.txt, destination=java/222.txt",
+  "timestamp": "2026-06-09T03:12:35.062Z",
+  "retry_count": 1
+}

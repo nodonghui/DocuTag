@@ -1,0 +1,17 @@
+{
+  "agents": [
+    {
+      "agent_id": "af8ce363ccae8935b",
+      "agent_type": "researcher",
+      "started_at": "2026-06-04T09:18:12.157Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-06-04T09:19:29.565Z",
+      "duration_ms": 77408
+    }
+  ],
+  "total_spawned": 1,
+  "total_completed": 1,
+  "total_failed": 0,
+  "last_updated": "2026-06-04T09:19:29.676Z"
+}

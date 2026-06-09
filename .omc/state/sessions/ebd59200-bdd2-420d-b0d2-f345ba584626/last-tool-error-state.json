@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"type \\\"C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag\\\\java\\\\1.txt\\\"\",\"description\":\"Verify file content\"}",
+  "error": "Exit code 1\n/usr/bin/bash: line 1: type: C:\\Users\\rdh04\\Project\\docuTag\\java\\1.txt: not found",
+  "timestamp": "2026-06-09T02:39:08.668Z",
+  "retry_count": 1
+}

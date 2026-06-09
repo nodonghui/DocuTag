@@ -1,1 +1,4 @@
 /react/docu_tag/.env
+.claude/outputs/
+.claude/audit.log
+.superpowers/

@@ -3,7 +3,9 @@ package docuTag.domain.document.service;
 import docuTag.domain.document.dto.DocumentCreateRequest;
 import docuTag.domain.document.dto.DocumentDto;
 import docuTag.domain.document.dto.DocumentSearchResponse;
+import docuTag.domain.document.dto.DocumentSearchResponse2;
 import docuTag.domain.document.dto.DocumentUpdateRequest;
+import docuTag.domain.document.dto.DocumentWithTagsDto;
 import docuTag.domain.document.entity.Document;
 import docuTag.domain.document.entity.DocumentTag;
 import docuTag.domain.document.repository.DocumentRepository;
@@ -20,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +97,7 @@ class DocumentServiceTest {
     @Test
     @DisplayName("단일 태그로 문서 목록 조회 - 성공")
     void getDocuments_singleTag_success() {
-        given(documentRepository.findDocumentsByTagWithPaging(eq(1L), eq("java"), isNull(), isNull(), eq(21)))
+        given(documentRepository.findDocumentsByTagsWithPaging(eq(1L), eq(List.of("java")), isNull(), isNull(), eq(21)))
                 .willReturn(List.of(document));
         given(documentRepository.findByIdsWithTags(anyList(), eq(1L)))
                 .willReturn(List.of(document));
@@ -102,7 +105,7 @@ class DocumentServiceTest {
         DocumentSearchResponse response = documentService.getDocuments(List.of("java"), null, null, 20, 1L);
 
         assertThat(response.getDocuments()).hasSize(1);
-        verify(documentRepository).findDocumentsByTagWithPaging(1L, "java", null, null, 21);
+        verify(documentRepository).findDocumentsByTagsWithPaging(1L, List.of("java"), null, null, 21);
     }
 
     @Test
@@ -317,5 +320,189 @@ class DocumentServiceTest {
         assertThatThrownBy(() -> documentService.deleteDocument(1L, 99L))
                 .isInstanceOf(ServiceException.class)
                 .satisfies(e -> assertThat(((ServiceException) e).getStatusCode()).isEqualTo(403));
+    }
+
+    // ========== getDocuments2 ==========
+
+    @Test
+    @DisplayName("getDocuments2 - 태그 없음, 결과 없음")
+    void getDocuments2_noTags_emptyResult() {
+        given(documentRepository.findDocumentIdsWithPaging(eq(1L), isNull(), isNull(), eq(21)))
+                .willReturn(List.of());
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of(), null, null, 20, 1L);
+
+        assertThat(response.getDocuments()).isEmpty();
+        assertThat(response.isHasNext()).isFalse();
+        assertThat(response.getLastId()).isZero();
+    }
+
+    @Test
+    @DisplayName("getDocuments2 - 태그 없음, 정상 조회")
+    void getDocuments2_noTags_success() {
+        given(documentRepository.findDocumentIdsWithPaging(eq(1L), isNull(), isNull(), eq(21)))
+                .willReturn(List.of(1L));
+        given(documentRepository.findAllWithTags(List.of(1L)))
+                .willReturn(List.of(document));
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of(), null, null, 20, 1L);
+
+        assertThat(response.getDocuments()).hasSize(1);
+        assertThat(response.isHasNext()).isFalse();
+        assertThat(response.getLastId()).isEqualTo(1L);
+        verify(documentRepository).findDocumentIdsWithPaging(1L, null, null, 21);
+    }
+
+    @Test
+    @DisplayName("getDocuments2 - 태그 있음, 정상 조회")
+    void getDocuments2_withTags_success() {
+        given(documentRepository.findDocumentIdsByTagNamesPaging(eq(1L), isNull(), isNull(), eq(List.of("java")), eq(20)))
+                .willReturn(List.of(1L));
+        given(documentRepository.findAllWithTags(List.of(1L)))
+                .willReturn(List.of(document));
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of("java"), null, null, 20, 1L);
+
+        assertThat(response.getDocuments()).hasSize(1);
+        verify(documentRepository).findDocumentIdsByTagNamesPaging(1L, null, null, List.of("java"), 20);
+    }
+
+    @Test
+    @DisplayName("getDocuments2 - 다음 페이지 있음")
+    void getDocuments2_hasNext_true() {
+        List<Long> ids = new ArrayList<>();
+        List<Document> docs = new ArrayList<>();
+        for (int i = 1; i <= 21; i++) ids.add((long) i);
+        for (int i = 1; i <= 20; i++) {
+            docs.add(Document.builder().documentId((long) i).user(user).title("제목" + i).content("내용").build());
+        }
+
+        given(documentRepository.findDocumentIdsWithPaging(eq(1L), isNull(), isNull(), eq(21)))
+                .willReturn(ids);
+        given(documentRepository.findAllWithTags(anyList()))
+                .willReturn(docs);
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of(), null, null, 20, 1L);
+
+        assertThat(response.isHasNext()).isTrue();
+        assertThat(response.getDocuments()).hasSize(20);
+    }
+
+    @Test
+    @DisplayName("getDocuments2 - nextLastId는 마지막 문서의 id")
+    void getDocuments2_nextLastId_isLastDocument() {
+        Document doc2 = Document.builder().documentId(2L).user(user).title("두번째").content("내용").build();
+
+        given(documentRepository.findDocumentIdsWithPaging(eq(1L), isNull(), isNull(), eq(21)))
+                .willReturn(List.of(2L, 1L));
+        given(documentRepository.findAllWithTags(anyList()))
+                .willReturn(List.of(doc2, document));
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of(), null, null, 20, 1L);
+
+        assertThat(response.getLastId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("getDocuments2 - DocumentWithTagsDto에 태그명 매핑")
+    void getDocuments2_dtoMapping_tagNames() {
+        Tag tag = Tag.builder().tagId(1L).tagName("java").build();
+        document.addTag(tag);
+
+        given(documentRepository.findDocumentIdsWithPaging(eq(1L), isNull(), isNull(), eq(21)))
+                .willReturn(List.of(1L));
+        given(documentRepository.findAllWithTags(anyList()))
+                .willReturn(List.of(document));
+
+        DocumentSearchResponse2 response = documentService.getDocuments2(List.of(), null, null, 20, 1L);
+
+        assertThat(response.getDocuments().get(0).getTags()).containsExactly("java");
+    }
+
+    // ========== getFilteredDocumentsWithTags ==========
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithTags - 빈 결과")
+    void getFilteredDocumentsWithTags_emptyRows_returnsEmpty() {
+        given(documentRepository.findFilteredWithTags(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.of());
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithTags - 동일 문서에 여러 태그 누적")
+    void getFilteredDocumentsWithTags_singleDoc_multipleTags() {
+        LocalDateTime now = LocalDateTime.now();
+        Object[] row1 = { 1L, 1L, "제목", "내용", now, now, "java" };
+        Object[] row2 = { 1L, 1L, "제목", "내용", now, now, "spring" };
+
+        given(documentRepository.findFilteredWithTags(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.<Object[]>of(row1, row2));
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTags()).containsExactlyInAnyOrder("java", "spring");
+    }
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithTags - Timestamp를 LocalDateTime으로 변환")
+    void getFilteredDocumentsWithTags_timestampConversion() {
+        Timestamp ts = Timestamp.valueOf(LocalDateTime.of(2026, 1, 1, 0, 0));
+        Object[] row = { 1L, 1L, "제목", "내용", ts, ts, "java" };
+
+        given(documentRepository.findFilteredWithTags(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.<Object[]>of(row));
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCreatedAt()).isEqualTo(ts.toLocalDateTime());
+    }
+
+    // ========== getFilteredDocumentsWithRawTags ==========
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithRawTags - 빈 결과")
+    void getFilteredDocumentsWithRawTags_emptyRows_returnsEmpty() {
+        given(documentRepository.findFilteredWithTagsGrouped(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.of());
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithRawTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithRawTags - 쉼표 구분 태그 문자열 파싱")
+    void getFilteredDocumentsWithRawTags_tagNamesRaw_splitByComma() {
+        LocalDateTime now = LocalDateTime.now();
+        Object[] row = { 1L, 1L, "제목", "내용", now, now, "java,spring,jpa" };
+
+        given(documentRepository.findFilteredWithTagsGrouped(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.<Object[]>of(row));
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithRawTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTags()).containsExactly("java", "spring", "jpa");
+    }
+
+    @Test
+    @DisplayName("getFilteredDocumentsWithRawTags - tagNamesRaw null이면 빈 태그 리스트")
+    void getFilteredDocumentsWithRawTags_nullTagNames_returnsEmptyTagList() {
+        LocalDateTime now = LocalDateTime.now();
+        Object[] row = { 1L, 1L, "제목", "내용", now, now, null };
+
+        given(documentRepository.findFilteredWithTagsGrouped(any(), any(), any(), any(), anyInt()))
+                .willReturn(List.<Object[]>of(row));
+
+        List<DocumentWithTagsDto> result = documentService.getFilteredDocumentsWithRawTags(1L, 100L, "제목", List.of("java"), 20);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTags()).isEmpty();
     }
 }

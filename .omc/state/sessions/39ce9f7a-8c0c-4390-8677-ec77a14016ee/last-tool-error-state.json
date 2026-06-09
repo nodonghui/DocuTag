@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag\\\\.claude\\\\planner.md\"}",
+  "error": "File does not exist. Note: your current working directory is C:\\Users\\rdh04\\Project\\docuTag.",
+  "timestamp": "2026-06-05T12:01:52.454Z",
+  "retry_count": 2
+}

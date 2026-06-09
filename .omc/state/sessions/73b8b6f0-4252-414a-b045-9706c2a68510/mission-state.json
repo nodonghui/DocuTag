@@ -1,0 +1,53 @@
+{
+  "updatedAt": "2026-06-04T09:19:29.565Z",
+  "missions": [
+    {
+      "id": "session:73b8b6f0-4252-414a-b045-9706c2a68510:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-06-04T09:18:12.157Z",
+      "updatedAt": "2026-06-04T09:19:29.565Z",
+      "status": "done",
+      "workerCount": 1,
+      "taskCounts": {
+        "total": 1,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 1,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "researcher:af8ce36",
+          "role": "researcher",
+          "ownership": "af8ce363ccae8935b",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-06-04T09:19:29.565Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:af8ce363ccae8935b:2026-06-04T09:18:12.157Z",
+          "at": "2026-06-04T09:18:12.157Z",
+          "kind": "update",
+          "agent": "researcher:af8ce36",
+          "detail": "started researcher:af8ce36",
+          "sourceKey": "session-start:af8ce363ccae8935b"
+        },
+        {
+          "id": "session-stop:af8ce363ccae8935b:2026-06-04T09:19:29.565Z",
+          "at": "2026-06-04T09:19:29.565Z",
+          "kind": "completion",
+          "agent": "researcher:af8ce36",
+          "detail": "completed",
+          "sourceKey": "session-stop:af8ce363ccae8935b"
+        }
+      ]
+    }
+  ]
+}

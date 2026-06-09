@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"Get-ChildItem -Path \\\"C:\\\\Users\\\\rdh04\\\\Project\\\\docuTag\\\" -Recurse -Filter \\\"*document*\\\" -Directory | Select-Object -ExpandProperty FullName\"}",
+  "error": "Exit code 127\n/usr/bin/bash: line 1: Get-ChildItem: command not found\n/usr/bin/bash: line 1: Select-Object: command not found",
+  "timestamp": "2026-06-05T11:15:20.298Z",
+  "retry_count": 1
+}

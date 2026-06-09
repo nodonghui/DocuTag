@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "entries": {
+    "466399dafa2d20f60587180bad0a07358eb7f2bce724df0ff682f038ad33f5ad": {
+      "last_emitted_at_ms": 1780564699406,
+      "message": "Read multiple files in parallel when possible for faster analysis."
+    },
+    "459c54e5f35d6a58dcd90d2aecc21fa6d1f35d241bc5b134c506f87dc7b6d67b": {
+      "last_emitted_at_ms": 1780564695354,
+      "message": "Combine searches in parallel when investigating multiple patterns."
+    },
+    "e156b04b5630363286e95285a229979bfdfc6a45cc507e6102c4ad225a7616b2": {
+      "last_emitted_at_ms": 1780564691923,
+      "message": "Spawning agent: researcher (inherit) | Task: 테스트 코드 현황 분석"
+    }
+  },
+  "updated_at": "2026-06-04T09:18:19.406Z"
+}
