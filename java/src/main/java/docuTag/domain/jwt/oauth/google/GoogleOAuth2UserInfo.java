@@ -1,6 +1,7 @@
 package docuTag.domain.jwt.oauth.google;
 
 import docuTag.domain.jwt.oauth.OAuth2UserInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 

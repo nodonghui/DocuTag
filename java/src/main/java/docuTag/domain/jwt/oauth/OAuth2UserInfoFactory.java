@@ -3,10 +3,13 @@ package docuTag.domain.jwt.oauth;
 import docuTag.domain.jwt.oauth.google.GoogleOAuth2UserInfo;
 import docuTag.domain.jwt.oauth.kakao.KakaoOAuth2UserInfo;
 import docuTag.global.exception.ServiceException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 public class OAuth2UserInfoFactory {
+
 
     public static OAuth2UserInfo of(String provider, Map<String, Object> attributes) {
         return switch (provider) {

@@ -2,6 +2,7 @@ package docuTag.domain.jwt;
 
 import docuTag.domain.jwt.oauth.OAuth2UserInfo;
 import docuTag.domain.jwt.oauth.OAuth2UserInfoFactory;
+import docuTag.domain.jwt.oauth.OAuth2UserInfoFactory2;
 import docuTag.domain.user.entity.User;
 import docuTag.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final OAuth2UserInfoFactory2 oAuth2UserInfoFactory2;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -27,6 +29,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // provider 자동 판별 (kakao / google)
         String provider = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.of(provider, oauth2User.getAttributes());
+        OAuth2UserInfo userInfo2 = oAuth2UserInfoFactory2.create(provider,oauth2User.getAttributes());
 
         User user = saveOrUpdate(userInfo);
 

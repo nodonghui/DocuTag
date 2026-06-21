@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1780972661660,
+  "lastScanned": 1782041989085,
   "projectRoot": "C:\\Users\\rdh04\\Project\\docuTag",
   "techStack": {
     "languages": [],
@@ -33,14 +33,14 @@
       "path": "build",
       "purpose": "Build output",
       "fileCount": 0,
-      "lastAccessed": 1780972661622,
+      "lastAccessed": 1782041988789,
       "keyFiles": []
     },
     "java": {
       "path": "java",
       "purpose": null,
       "fileCount": 7,
-      "lastAccessed": 1780972661622,
+      "lastAccessed": 1782041988831,
       "keyFiles": [
         "build.gradle",
         "gradlew",
@@ -53,14 +53,14 @@
       "path": "react",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1780972661623,
+      "lastAccessed": 1782041988866,
       "keyFiles": []
     },
     "script": {
       "path": "script",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1780972661624,
+      "lastAccessed": 1782041988882,
       "keyFiles": [
         "load_data.sql",
         "run_sql.py",
@@ -71,181 +71,12 @@
       "path": "java\\build",
       "purpose": "Build output",
       "fileCount": 1,
-      "lastAccessed": 1780972661628,
+      "lastAccessed": 1782041988889,
       "keyFiles": [
         "resolvedMainClassName"
       ]
     }
   },
-  "hotPaths": [
-    {
-      "path": "java\\111.txt",
-      "accessCount": 6,
-      "lastAccessed": 1780983278583,
-      "type": "file"
-    },
-    {
-      "path": "java\\222.txt",
-      "accessCount": 5,
-      "lastAccessed": 1780983275478,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 4,
-      "lastAccessed": 1780974676773,
-      "type": "directory"
-    },
-    {
-      "path": ".claude\\analysis\\20260609_000000_analysis.md",
-      "accessCount": 3,
-      "lastAccessed": 1780983215461,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\reviews\\20260609_000000_review.md",
-      "accessCount": 3,
-      "lastAccessed": 1780983305562,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\hooks\\pre_tool_logger.py",
-      "accessCount": 2,
-      "lastAccessed": 1780974189521,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\settings.json",
-      "accessCount": 2,
-      "lastAccessed": 1780974191118,
-      "type": "file"
-    },
-    {
-      "path": "java\\1.txt",
-      "accessCount": 1,
-      "lastAccessed": 1780972742882,
-      "type": "file"
-    },
-    {
-      "path": "CLAUDE.md",
-      "accessCount": 1,
-      "lastAccessed": 1780973817937,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\plans\\20260609_000000_plans.md",
-      "accessCount": 1,
-      "lastAccessed": 1780973942675,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\hooks",
-      "accessCount": 1,
-      "lastAccessed": 1780974184330,
-      "type": "directory"
-    },
-    {
-      "path": ".claude",
-      "accessCount": 1,
-      "lastAccessed": 1780974185030,
-      "type": "directory"
-    },
-    {
-      "path": ".claude\\hooks\\post_tool_logger.py",
-      "accessCount": 1,
-      "lastAccessed": 1780974189956,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\hooks\\notification_logger.py",
-      "accessCount": 1,
-      "lastAccessed": 1780974190383,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\hooks\\check_approved.py",
-      "accessCount": 1,
-      "lastAccessed": 1780974190918,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\logs",
-      "accessCount": 1,
-      "lastAccessed": 1780974221973,
-      "type": "directory"
-    },
-    {
-      "path": ".claude\\logs\\sessions\\f4603c6e-3744-4df2-a28a-634a88a521cc\\session.jsonl",
-      "accessCount": 1,
-      "lastAccessed": 1780974229074,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\logs\\notification_raw.jsonl",
-      "accessCount": 1,
-      "lastAccessed": 1780974229415,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\analysis\\20260609_001000_hooks_analysis.md",
-      "accessCount": 1,
-      "lastAccessed": 1780974310276,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\analysis\\20260609_002000_analysis.md",
-      "accessCount": 1,
-      "lastAccessed": 1780974694655,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\plans\\20260609_002000_plans.md",
-      "accessCount": 1,
-      "lastAccessed": 1780974712060,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\reviews\\20260609_002000_review.md",
-      "accessCount": 1,
-      "lastAccessed": 1780974782323,
-      "type": "file"
-    },
-    {
-      "path": "java",
-      "accessCount": 1,
-      "lastAccessed": 1780981116951,
-      "type": "directory"
-    },
-    {
-      "path": ".claude\\analysis\\20260609_135841_analysis.md",
-      "accessCount": 1,
-      "lastAccessed": 1780981136450,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\plans\\20260609_135841_plans.md",
-      "accessCount": 1,
-      "lastAccessed": 1780981151519,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\analysis\\20260609_120000_analysis.md",
-      "accessCount": 1,
-      "lastAccessed": 1780982217391,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\plans\\20260609_120001_plans.md",
-      "accessCount": 1,
-      "lastAccessed": 1780982229542,
-      "type": "file"
-    },
-    {
-      "path": ".claude\\reviews\\20260609_120002_review.md",
-      "accessCount": 1,
-      "lastAccessed": 1780982260190,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

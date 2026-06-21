@@ -1,9 +1,11 @@
 package docuTag.domain.jwt.oauth.kakao;
 
 import docuTag.domain.jwt.oauth.OAuth2UserInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class KakaoOAuth2UserInfo implements OAuth2UserInfo {
 
